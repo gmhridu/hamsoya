@@ -1,0 +1,24 @@
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="heroGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#967911;stop-opacity:0.1" />
+      <stop offset="50%" style="stop-color:#00489a;stop-opacity:0.05" />
+      <stop offset="100%" style="stop-color:#fedc92;stop-opacity:0.1" />
+    </linearGradient>
+    <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="20" cy="20" r="1" fill="#967911" opacity="0.1"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background gradient -->
+  <rect width="1920" height="1080" fill="url(#heroGradient)"/>
+  
+  <!-- Dot pattern overlay -->
+  <rect width="1920" height="1080" fill="url(#dots)"/>
+  
+  <!-- Decorative shapes -->
+  <circle cx="200" cy="200" r="100" fill="#967911" opacity="0.05"/>
+  <circle cx="1720" cy="880" r="150" fill="#00489a" opacity="0.05"/>
+  <circle cx="1600" cy="200" r="80" fill="#fedc92" opacity="0.1"/>
+  <circle cx="320" cy="880" r="120" fill="#967911" opacity="0.03"/>
+</svg>

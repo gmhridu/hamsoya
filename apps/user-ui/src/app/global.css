@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .animate-reverse-spin {
+    animation: reverse-spin 1s linear infinite;
+  }
+}
+
+@keyframes reverse-spin {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@layer base {
+  :root {
+    /* Authentic Logo Brand Theme - Light Mode */
+    --color-background: 48 100% 97%; /* Cream background */
+    --color-foreground: 0 0% 0%; /* Black text from logo */
+    --color-card: 0 0% 100%; /* White cards from logo */
+    --color-card-foreground: 0 0% 0%; /* Black card text from logo */
+    --color-popover: 0 0% 100%; /* White popover from logo */
+    --color-popover-foreground: 0 0% 0%; /* Black popover text from logo */
+    --color-primary: 42 88% 27%; /* Gold/brown primary from logo (#967911) */
+    --color-primary-foreground: 0 0% 100%; /* White text on primary */
+    --color-secondary: 210 100% 30%; /* Blue secondary from logo (#00489a) */
+    --color-secondary-foreground: 0 0% 100%; /* White text on secondary */
+    --color-muted: 48 50% 90%; /* Muted cream */
+    --color-muted-foreground: 120 50% 35%; /* Muted forest green */
+    --color-accent: 43 74% 66%; /* Golden accent */
+    --color-accent-foreground: 120 100% 15%; /* Deep forest green on accent */
+    --color-destructive: 348 83% 47%; /* Natural red */
+    --color-destructive-foreground: 0 0% 98%; /* White on destructive */
+    --color-border: 39 30% 85%; /* Light earth border */
+    --color-input: 39 30% 85%; /* Light earth input */
+    --color-ring: 120 100% 15%; /* Deep forest green ring */
+    --radius: 0.75rem; /* Slightly more rounded for organic feel */
+
+    /* Updated shadcn variables for Modern Ecommerce theme */
+    --background: 0 0% 100%; /* White background */
+    --foreground: 0 0% 10%; /* Dark gray text */
+    --card: 0 0% 100%; /* White cards */
+    --card-foreground: 0 0% 10%; /* Dark gray card text */
+    --popover: 0 0% 100%; /* White popover */
+    --popover-foreground: 0 0% 10%; /* Dark gray popover text */
+    --primary: 210 100% 27%; /* Dark Blue primary (#004B87) */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
+    --secondary: 45 78% 47%; /* Gold secondary (#C7A528) */
+    --secondary-foreground: 0 0% 10%; /* Dark text on secondary */
+    --muted: 0 0% 96%; /* Light gray muted */
+    --muted-foreground: 220 9% 46%; /* Medium gray text */
+    --accent: 0 0% 96%; /* Light gray accent */
+    --accent-foreground: 0 0% 10%; /* Dark text on accent */
+    --destructive: 0 84% 60%; /* Red for destructive actions */
+    --destructive-foreground: 0 0% 98%; /* White */
+    --border: 220 13% 91%; /* Light border */
+    --input: 220 13% 91%; /* Light input border */
+    --ring: 210 100% 27%; /* Dark blue ring */
+
+    /* Logo-based chart colors */
+    --chart-1: 42 88% 27%; /* Gold/brown from logo */
+    --chart-2: 210 100% 30%; /* Blue from logo */
+    --chart-3: 45 85% 78%; /* Light gold/cream from logo */
+    --chart-4: 42 20% 50%; /* Earth tone from logo */
+    --chart-5: 0 0% 0%; /* Black from logo */
+  }
+
+  .dark {
+    /* Authentic Logo Brand Theme - Dark Mode */
+    --color-background: 42 20% 8%; /* Dark earth background */
+    --color-foreground: 0 0% 100%; /* White text from logo */
+    --color-card: 42 15% 12%; /* Dark earth cards */
+    --color-card-foreground: 0 0% 100%; /* White card text from logo */
+    --color-popover: 42 15% 12%; /* Dark earth popover */
+    --color-popover-foreground: 0 0% 100%; /* White popover text from logo */
+    --color-primary: 42 88% 35%; /* Lighter gold primary for dark mode */
+    --color-primary-foreground: 0 0% 0%; /* Black text on primary */
+    --color-secondary: 210 100% 40%; /* Lighter blue for dark mode */
+    --color-secondary-foreground: 0 0% 100%; /* White text on secondary */
+    --color-muted: 42 10% 15%; /* Muted dark earth */
+    --color-muted-foreground: 48 50% 70%; /* Muted light cream */
+    --color-accent: 43 74% 66%; /* Golden accent */
+    --color-accent-foreground: 120 50% 8%; /* Dark forest green on accent */
+    --color-destructive: 348 83% 47%; /* Natural red */
+    --color-destructive-foreground: 48 100% 95%; /* Light cream on destructive */
+    --color-border: 120 20% 20%; /* Dark green border */
+    --color-input: 120 20% 20%; /* Dark green input */
+    --color-ring: 43 74% 66%; /* Golden ring */
+
+    /* Updated shadcn variables for dark Modern Ecommerce theme */
+    --background: 0 0% 8%; /* Dark background */
+    --foreground: 0 0% 95%; /* Light text */
+    --card: 0 0% 12%; /* Dark cards */
+    --card-foreground: 0 0% 95%; /* Light card text */
+    --popover: 0 0% 12%; /* Dark popover */
+    --popover-foreground: 0 0% 95%; /* Light popover text */
+    --primary: 210 100% 40%; /* Lighter blue for dark mode */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
+    --secondary: 45 78% 60%; /* Lighter gold for dark mode */
+    --secondary-foreground: 0 0% 10%; /* Dark text on secondary */
+    --muted: 0 0% 15%; /* Dark muted */
+    --muted-foreground: 220 9% 65%; /* Light muted text */
+    --accent: 0 0% 15%; /* Dark accent */
+    --accent-foreground: 0 0% 95%; /* Light text on accent */
+    --destructive: 0 84% 60%; /* Red for destructive actions */
+    --destructive-foreground: 0 0% 100%; /* White text */
+    --border: 0 0% 20%; /* Dark border */
+    --input: 0 0% 20%; /* Dark input border */
+    --ring: 210 100% 40%; /* Blue ring for dark mode */
+
+    /* Logo-based dark chart colors */
+    --chart-1: 42 88% 40%; /* Lighter gold from logo */
+    --chart-2: 210 100% 50%; /* Lighter blue from logo */
+    --chart-3: 45 85% 85%; /* Lighter cream from logo */
+    --chart-4: 42 30% 60%; /* Lighter earth tone from logo */
+    --chart-5: 0 0% 80%; /* Light gray instead of black for visibility */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

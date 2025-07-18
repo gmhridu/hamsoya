@@ -17,6 +17,8 @@ node_modules
 .settings/
 *.sublime-workspace
 
+.env
+
 # IDE - VSCode
 .vscode/*
 !.vscode/settings.json
@@ -44,3 +46,9 @@ Thumbs.db
 .github/instructions/nx.instructions.md
 
 test-output
+
+/generated/prisma
+
+# Next.js
+.next
+out

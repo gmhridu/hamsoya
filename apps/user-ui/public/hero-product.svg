@@ -1,0 +1,38 @@
+<svg width="800" height="800" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="productGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#967911;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#00489a;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#fedc92;stop-opacity:0.9" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="20" flood-color="#000000" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="400" cy="400" r="350" fill="url(#productGradient)" filter="url(#shadow)"/>
+  
+  <!-- Product container (bottle/package shape) -->
+  <rect x="300" y="200" width="200" height="400" rx="20" fill="#ffffff" opacity="0.9"/>
+  <rect x="310" y="210" width="180" height="380" rx="15" fill="#f8f9fa"/>
+  
+  <!-- Product label -->
+  <rect x="320" y="250" width="160" height="100" rx="8" fill="#967911" opacity="0.1"/>
+  <rect x="330" y="270" width="140" height="15" rx="3" fill="#967911" opacity="0.3"/>
+  <rect x="330" y="295" width="100" height="10" rx="2" fill="#967911" opacity="0.2"/>
+  <rect x="330" y="315" width="120" height="10" rx="2" fill="#967911" opacity="0.2"/>
+  
+  <!-- Product details -->
+  <circle cx="400" cy="450" r="30" fill="#00489a" opacity="0.2"/>
+  <circle cx="400" cy="450" r="15" fill="#00489a" opacity="0.4"/>
+  
+  <!-- Decorative elements -->
+  <circle cx="350" cy="180" r="8" fill="#fedc92" opacity="0.6"/>
+  <circle cx="450" cy="180" r="8" fill="#fedc92" opacity="0.6"/>
+  <circle cx="400" cy="160" r="12" fill="#967911" opacity="0.4"/>
+  
+  <!-- Premium badge -->
+  <rect x="320" y="520" width="160" height="30" rx="15" fill="#967911"/>
+  <text x="400" y="540" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="14" font-weight="bold">PREMIUM QUALITY</text>
+</svg>

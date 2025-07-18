@@ -1,0 +1,32 @@
+HAMSOYA - Your trusted marketplace
+
+Verify Your Email Address
+=========================
+
+Hi <%= name %>,
+
+Welcome to Hamsoya! To complete your account setup and start exploring our marketplace, please verify your email address using the verification code below.
+
+YOUR VERIFICATION CODE: <%= otp %>
+
+This code expires in 5 minutes.
+
+How to verify your account:
+1. Copy the verification code above
+2. Return to the Hamsoya registration page
+3. Paste the code in the verification field
+4. Click "Verify Email" to complete your registration
+
+SECURITY NOTICE: This verification code is valid for 5 minutes only. If you didn't request this verification, please ignore this email or contact our support team.
+
+---
+
+This email was sent to you because you signed up for a Hamsoya account.
+
+If you have any questions, please contact us at support@hamsoya.com
+
+© 2024 Hamsoya. All rights reserved.
+
+Privacy Policy: [Link]
+Terms of Service: [Link]
+Unsubscribe: [Link]

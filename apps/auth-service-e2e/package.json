@@ -4,7 +4,7 @@
   "private": true,
   "nx": {
     "implicitDependencies": [
-      "@hamsoya-monorepo/auth-service"
+      "auth-service"
     ],
     "targets": {
       "e2e": {
@@ -17,8 +17,8 @@
           "passWithNoTests": true
         },
         "dependsOn": [
-          "@hamsoya-monorepo/auth-service:build",
-          "@hamsoya-monorepo/auth-service:serve"
+          "auth-service:build",
+          "auth-service:serve"
         ]
       }
     }

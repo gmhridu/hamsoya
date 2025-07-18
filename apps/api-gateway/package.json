@@ -1,0 +1,69 @@
+{
+  "name": "@hamsoya-monorepo/api-gateway",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "targets": {
+      "build": {
+        "executor": "@nx/webpack:webpack",
+        "outputs": [
+          "{options.outputPath}"
+        ],
+        "defaultConfiguration": "production",
+        "options": {
+          "target": "node",
+          "compiler": "tsc",
+          "outputPath": "apps/api-gateway/dist",
+          "main": "apps/api-gateway/src/main.ts",
+          "tsConfig": "apps/api-gateway/tsconfig.app.json",
+          "assets": [],
+          "webpackConfig": "apps/api-gateway/webpack.config.js"
+        },
+        "configurations": {
+          "development": {
+            "extractLicenses": false,
+            "optimization": false,
+            "sourceMap": true,
+            "vendorChunk": true
+          },
+          "production": {
+            "extractLicenses": true,
+            "optimization": true,
+            "sourceMap": false,
+            "vendorChunk": false
+          }
+        }
+      },
+      "serve": {
+        "continuous": true,
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": [
+          "build"
+        ],
+        "options": {
+          "buildTarget": "@hamsoya-monorepo/api-gateway:build",
+          "runBuildTargetDependencies": false,
+          "inspect": "inspect",
+          "port": 9230
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "@hamsoya-monorepo/api-gateway:build:development",
+            "inspect": "inspect",
+            "port": 9230
+          },
+          "production": {
+            "buildTarget": "@hamsoya-monorepo/api-gateway:build:production",
+            "inspect": false
+          }
+        }
+      },
+      "test": {
+        "options": {
+          "passWithNoTests": true
+        }
+      }
+    }
+  }
+}

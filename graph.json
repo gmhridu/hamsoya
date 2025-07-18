@@ -1,0 +1,1115 @@
+{
+  "graph": {
+    "nodes": {
+      "@hamsoya-monorepo/auth-service-e2e": {
+        "name": "@hamsoya-monorepo/auth-service-e2e",
+        "type": "lib",
+        "data": {
+          "root": "apps/auth-service-e2e",
+          "projectType": "library",
+          "targets": {
+            "typecheck": {
+              "dependsOn": [
+                "^typecheck"
+              ],
+              "options": {
+                "cwd": "apps/auth-service-e2e",
+                "command": "tsc --build --emitDeclarationOnly"
+              },
+              "cache": true,
+              "inputs": [
+                "{projectRoot}/package.json",
+                "{workspaceRoot}/tsconfig.base.json",
+                "{projectRoot}/tsconfig.json",
+                "{projectRoot}/jest.config.ts",
+                "{projectRoot}/src/**/*.ts",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "typescript"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/out-tsc/@hamsoya-monorepo/auth-service-e2e/**/*.d.ts",
+                "{projectRoot}/out-tsc/@hamsoya-monorepo/auth-service-e2e/**/*.d.ts.map",
+                "{projectRoot}/out-tsc/@hamsoya-monorepo/auth-service-e2e/tsconfig.tsbuildinfo"
+              ],
+              "syncGenerators": [
+                "@nx/js:typescript-sync"
+              ],
+              "metadata": {
+                "technologies": [
+                  "typescript"
+                ],
+                "description": "Runs type-checking for the project.",
+                "help": {
+                  "command": "bun tsc --build --help",
+                  "example": {
+                    "args": [
+                      "--force"
+                    ]
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "apps/auth-service-e2e",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/eslint.config.mjs",
+                "{workspaceRoot}/apps/auth-service-e2e/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "bun eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "options": {
+                "cwd": "apps/auth-service-e2e",
+                "env": {
+                  "TS_NODE_COMPILER_OPTIONS": "{\"moduleResolution\":\"node10\",\"module\":\"commonjs\",\"customConditions\":null}"
+                },
+                "command": "jest"
+              },
+              "metadata": {
+                "technologies": [
+                  "jest"
+                ],
+                "description": "Run Jest Tests",
+                "help": {
+                  "command": "bun jest --help",
+                  "example": {
+                    "options": {
+                      "coverage": true
+                    }
+                  }
+                }
+              },
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                "{workspaceRoot}/jest.preset.js",
+                {
+                  "externalDependencies": [
+                    "jest"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-output/jest/coverage"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ]
+            },
+            "e2e": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{projectRoot}/test-output/jest/coverage"
+              ],
+              "options": {
+                "jestConfig": "apps/auth-service-e2e/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "dependsOn": [
+                "auth-service:build",
+                "auth-service:serve"
+              ],
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "@hamsoya-monorepo/auth-service-e2e",
+          "tags": [
+            "npm:private"
+          ],
+          "implicitDependencies": [
+            "auth-service"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@hamsoya-monorepo/auth-service-e2e",
+              "isInPackageManagerWorkspaces": true
+            }
+          }
+        }
+      },
+      "prisma-client-587da6df7c02f59d16ee997425733b98bc89b1b5c0fbf33c31f06d61a4f8b2db": {
+        "name": "prisma-client-587da6df7c02f59d16ee997425733b98bc89b1b5c0fbf33c31f06d61a4f8b2db",
+        "type": "lib",
+        "data": {
+          "root": "prisma/@prisma/client",
+          "targets": {
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "prisma/@prisma/client",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "bun eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "prisma-client-587da6df7c02f59d16ee997425733b98bc89b1b5c0fbf33c31f06d61a4f8b2db",
+          "implicitDependencies": [],
+          "tags": []
+        }
+      },
+      "@hamsoya-monorepo/api-gateway-e2e": {
+        "name": "@hamsoya-monorepo/api-gateway-e2e",
+        "type": "lib",
+        "data": {
+          "root": "apps/api-gateway-e2e",
+          "projectType": "library",
+          "targets": {
+            "typecheck": {
+              "dependsOn": [
+                "^typecheck"
+              ],
+              "options": {
+                "cwd": "apps/api-gateway-e2e",
+                "command": "tsc --build --emitDeclarationOnly"
+              },
+              "cache": true,
+              "inputs": [
+                "{projectRoot}/package.json",
+                "{workspaceRoot}/tsconfig.base.json",
+                "{projectRoot}/tsconfig.json",
+                "{projectRoot}/jest.config.ts",
+                "{projectRoot}/src/**/*.ts",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "typescript"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/out-tsc/@hamsoya-monorepo/api-gateway-e2e/**/*.d.ts",
+                "{projectRoot}/out-tsc/@hamsoya-monorepo/api-gateway-e2e/**/*.d.ts.map",
+                "{projectRoot}/out-tsc/@hamsoya-monorepo/api-gateway-e2e/tsconfig.tsbuildinfo"
+              ],
+              "syncGenerators": [
+                "@nx/js:typescript-sync"
+              ],
+              "metadata": {
+                "technologies": [
+                  "typescript"
+                ],
+                "description": "Runs type-checking for the project.",
+                "help": {
+                  "command": "bun tsc --build --help",
+                  "example": {
+                    "args": [
+                      "--force"
+                    ]
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "apps/api-gateway-e2e",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/eslint.config.mjs",
+                "{workspaceRoot}/apps/api-gateway-e2e/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "bun eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "e2e": {
+              "executor": "@nx/jest:jest",
+              "outputs": [
+                "{projectRoot}/test-output/jest/coverage"
+              ],
+              "options": {
+                "jestConfig": "apps/api-gateway-e2e/jest.config.ts",
+                "passWithNoTests": true
+              },
+              "dependsOn": [
+                "@hamsoya-monorepo/api-gateway:build",
+                "@hamsoya-monorepo/api-gateway:serve"
+              ],
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "@hamsoya-monorepo/api-gateway-e2e",
+          "tags": [
+            "npm:private"
+          ],
+          "implicitDependencies": [
+            "@hamsoya-monorepo/api-gateway"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@hamsoya-monorepo/api-gateway-e2e",
+              "isInPackageManagerWorkspaces": true
+            }
+          }
+        }
+      },
+      "auth-service": {
+        "name": "auth-service",
+        "type": "app",
+        "data": {
+          "root": "apps/auth-service",
+          "projectType": "application",
+          "targets": {
+            "typecheck": {
+              "dependsOn": [
+                "^typecheck"
+              ],
+              "options": {
+                "cwd": "apps/auth-service",
+                "command": "tsc --build --emitDeclarationOnly"
+              },
+              "cache": true,
+              "inputs": [
+                "{projectRoot}/package.json",
+                "{workspaceRoot}/tsconfig.base.json",
+                "{projectRoot}/tsconfig.json",
+                "{projectRoot}/tsconfig.app.json",
+                "{projectRoot}/tsconfig.spec.json",
+                "{projectRoot}/src/**/*.ts",
+                "{workspaceRoot}/packages/**/*.ts",
+                "{projectRoot}/jest.config.ts",
+                "{projectRoot}/src/**/*.test.ts",
+                "{projectRoot}/src/**/*.spec.ts",
+                "{projectRoot}/src/**/*.d.ts",
+                "!{projectRoot}/out-tsc",
+                "!{projectRoot}/dist",
+                "!{projectRoot}/eslint.config.js",
+                "!{projectRoot}/eslint.config.cjs",
+                "!{projectRoot}/eslint.config.mjs",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "typescript"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/out-tsc/auth-service/**/*.d.ts",
+                "{projectRoot}/out-tsc/auth-service/**/*.d.ts.map",
+                "{projectRoot}/out-tsc/auth-service/tsconfig.app.tsbuildinfo",
+                "{projectRoot}/out-tsc/jest/**/*.d.ts",
+                "{projectRoot}/out-tsc/jest/**/*.d.ts.map",
+                "{projectRoot}/out-tsc/jest/tsconfig.tsbuildinfo"
+              ],
+              "syncGenerators": [
+                "@nx/js:typescript-sync"
+              ],
+              "metadata": {
+                "technologies": [
+                  "typescript"
+                ],
+                "description": "Runs type-checking for the project.",
+                "help": {
+                  "command": "bun tsc --build --help",
+                  "example": {
+                    "args": [
+                      "--force"
+                    ]
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "apps/auth-service",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/eslint.config.mjs",
+                "{workspaceRoot}/apps/auth-service/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "bun eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "metadata": {
+                "technologies": [
+                  "jest"
+                ],
+                "description": "Run Jest Tests",
+                "help": {
+                  "command": "bun jest --help",
+                  "example": {
+                    "options": {
+                      "coverage": true
+                    }
+                  }
+                }
+              },
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                "{workspaceRoot}/jest.preset.js",
+                {
+                  "externalDependencies": [
+                    "jest"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-output/jest/coverage"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "apps/auth-service",
+                "env": {
+                  "TS_NODE_COMPILER_OPTIONS": "{\"moduleResolution\":\"node10\",\"module\":\"commonjs\",\"customConditions\":null}"
+                },
+                "command": "jest",
+                "passWithNoTests": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ]
+            },
+            "build": {
+              "executor": "@nx/webpack:webpack",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "defaultConfiguration": "production",
+              "options": {
+                "target": "node",
+                "compiler": "tsc",
+                "outputPath": "apps/auth-service/dist",
+                "main": "apps/auth-service/src/main.ts",
+                "tsConfig": "apps/auth-service/tsconfig.app.json",
+                "assets": [],
+                "webpackConfig": "apps/auth-service/webpack.config.js"
+              },
+              "configurations": {
+                "development": {
+                  "extractLicenses": false,
+                  "optimization": false,
+                  "sourceMap": true,
+                  "vendorChunk": true
+                },
+                "production": {
+                  "extractLicenses": true,
+                  "optimization": true,
+                  "sourceMap": false,
+                  "vendorChunk": false
+                }
+              },
+              "parallelism": true
+            },
+            "serve": {
+              "executor": "@nx/js:node",
+              "defaultConfiguration": "development",
+              "dependsOn": [
+                "build"
+              ],
+              "options": {
+                "buildTarget": "auth-service:build",
+                "runBuildTargetDependencies": false
+              },
+              "configurations": {
+                "development": {
+                  "buildTarget": "auth-service:build:development"
+                },
+                "production": {
+                  "buildTarget": "auth-service:build:production"
+                }
+              },
+              "parallelism": true
+            },
+            "preview": {
+              "continuous": true,
+              "options": {
+                "cwd": "apps/auth-service",
+                "args": [
+                  "--node-env=production"
+                ],
+                "command": "webpack-cli serve"
+              },
+              "metadata": {
+                "technologies": [
+                  "webpack"
+                ],
+                "description": "Starts Webpack dev server in production mode",
+                "help": {
+                  "command": "bun webpack-cli serve --help",
+                  "example": {
+                    "options": {
+                      "args": [
+                        "--client-progress",
+                        "--history-api-fallback "
+                      ]
+                    }
+                  }
+                }
+              },
+              "syncGenerators": [
+                "@nx/js:typescript-sync"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "serve-static": {
+              "continuous": true,
+              "dependsOn": [
+                "build"
+              ],
+              "executor": "@nx/web:file-server",
+              "options": {
+                "buildTarget": "build",
+                "spa": true
+              },
+              "syncGenerators": [
+                "@nx/js:typescript-sync"
+              ],
+              "configurations": {},
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "bun nx watch --projects auth-service --includeDependentProjects -- bun nx build-deps auth-service"
+              },
+              "configurations": {},
+              "parallelism": true
+            },
+            "dev": {
+              "executor": "nx:run-script",
+              "options": {
+                "script": "dev"
+              },
+              "metadata": {
+                "scriptContent": "node src/main.ts",
+                "runCommand": "bun run dev -- undefined"
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "metadata": {
+            "targetGroups": {
+              "NPM Scripts": [
+                "dev"
+              ]
+            },
+            "js": {
+              "packageName": "@./auth-service",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "name": "auth-service",
+          "sourceRoot": "auth-service/src",
+          "tags": [
+            "npm:private"
+          ],
+          "implicitDependencies": []
+        }
+      },
+      "@hamsoya-monorepo/api-gateway": {
+        "name": "@hamsoya-monorepo/api-gateway",
+        "type": "app",
+        "data": {
+          "root": "apps/api-gateway",
+          "projectType": "application",
+          "targets": {
+            "typecheck": {
+              "dependsOn": [
+                "^typecheck"
+              ],
+              "options": {
+                "cwd": "apps/api-gateway",
+                "command": "tsc --build --emitDeclarationOnly"
+              },
+              "cache": true,
+              "inputs": [
+                "{projectRoot}/package.json",
+                "{workspaceRoot}/tsconfig.base.json",
+                "{projectRoot}/tsconfig.json",
+                "{projectRoot}/tsconfig.app.json",
+                "{projectRoot}/tsconfig.spec.json",
+                "{projectRoot}/src/**/*.ts",
+                "{projectRoot}/jest.config.ts",
+                "{projectRoot}/src/**/*.test.ts",
+                "{projectRoot}/src/**/*.spec.ts",
+                "{projectRoot}/src/**/*.d.ts",
+                "!{projectRoot}/out-tsc",
+                "!{projectRoot}/dist",
+                "!{projectRoot}/eslint.config.js",
+                "!{projectRoot}/eslint.config.cjs",
+                "!{projectRoot}/eslint.config.mjs",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "typescript"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/dist/**/*.d.ts",
+                "{projectRoot}/dist/**/*.d.ts.map",
+                "{projectRoot}/dist/tsconfig.app.tsbuildinfo",
+                "{projectRoot}/out-tsc/jest/**/*.d.ts",
+                "{projectRoot}/out-tsc/jest/**/*.d.ts.map",
+                "{projectRoot}/out-tsc/jest/tsconfig.tsbuildinfo"
+              ],
+              "syncGenerators": [
+                "@nx/js:typescript-sync"
+              ],
+              "metadata": {
+                "technologies": [
+                  "typescript"
+                ],
+                "description": "Runs type-checking for the project.",
+                "help": {
+                  "command": "bun tsc --build --help",
+                  "example": {
+                    "args": [
+                      "--force"
+                    ]
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "apps/api-gateway",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/eslint.config.mjs",
+                "{workspaceRoot}/apps/api-gateway/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "bun eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "test": {
+              "metadata": {
+                "technologies": [
+                  "jest"
+                ],
+                "description": "Run Jest Tests",
+                "help": {
+                  "command": "bun jest --help",
+                  "example": {
+                    "options": {
+                      "coverage": true
+                    }
+                  }
+                }
+              },
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                "{workspaceRoot}/jest.preset.js",
+                {
+                  "externalDependencies": [
+                    "jest"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{projectRoot}/test-output/jest/coverage"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "cwd": "apps/api-gateway",
+                "env": {
+                  "TS_NODE_COMPILER_OPTIONS": "{\"moduleResolution\":\"node10\",\"module\":\"commonjs\",\"customConditions\":null}"
+                },
+                "command": "jest",
+                "passWithNoTests": true
+              },
+              "configurations": {},
+              "parallelism": true,
+              "dependsOn": [
+                "^build"
+              ]
+            },
+            "build": {
+              "executor": "@nx/webpack:webpack",
+              "outputs": [
+                "{options.outputPath}"
+              ],
+              "defaultConfiguration": "production",
+              "options": {
+                "target": "node",
+                "compiler": "tsc",
+                "outputPath": "apps/api-gateway/dist",
+                "main": "apps/api-gateway/src/main.ts",
+                "tsConfig": "apps/api-gateway/tsconfig.app.json",
+                "assets": [],
+                "webpackConfig": "apps/api-gateway/webpack.config.js"
+              },
+              "configurations": {
+                "development": {
+                  "extractLicenses": false,
+                  "optimization": false,
+                  "sourceMap": true,
+                  "vendorChunk": true
+                },
+                "production": {
+                  "extractLicenses": true,
+                  "optimization": true,
+                  "sourceMap": false,
+                  "vendorChunk": false
+                }
+              },
+              "parallelism": true
+            },
+            "serve": {
+              "continuous": true,
+              "executor": "@nx/js:node",
+              "defaultConfiguration": "development",
+              "dependsOn": [
+                "build"
+              ],
+              "options": {
+                "buildTarget": "@hamsoya-monorepo/api-gateway:build",
+                "runBuildTargetDependencies": false,
+                "inspect": "inspect",
+                "port": 9230
+              },
+              "configurations": {
+                "development": {
+                  "buildTarget": "@hamsoya-monorepo/api-gateway:build:development",
+                  "inspect": "inspect",
+                  "port": 9230
+                },
+                "production": {
+                  "buildTarget": "@hamsoya-monorepo/api-gateway:build:production",
+                  "inspect": false
+                }
+              },
+              "parallelism": true
+            },
+            "preview": {
+              "continuous": true,
+              "options": {
+                "cwd": "apps/api-gateway",
+                "args": [
+                  "--node-env=production"
+                ],
+                "command": "webpack-cli serve"
+              },
+              "metadata": {
+                "technologies": [
+                  "webpack"
+                ],
+                "description": "Starts Webpack dev server in production mode",
+                "help": {
+                  "command": "bun webpack-cli serve --help",
+                  "example": {
+                    "options": {
+                      "args": [
+                        "--client-progress",
+                        "--history-api-fallback "
+                      ]
+                    }
+                  }
+                }
+              },
+              "syncGenerators": [
+                "@nx/js:typescript-sync"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "serve-static": {
+              "continuous": true,
+              "dependsOn": [
+                "build"
+              ],
+              "executor": "@nx/web:file-server",
+              "options": {
+                "buildTarget": "build",
+                "spa": true
+              },
+              "syncGenerators": [
+                "@nx/js:typescript-sync"
+              ],
+              "configurations": {},
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "bun nx watch --projects @hamsoya-monorepo/api-gateway --includeDependentProjects -- bun nx build-deps @hamsoya-monorepo/api-gateway"
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@hamsoya-monorepo/api-gateway",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "name": "@hamsoya-monorepo/api-gateway",
+          "tags": [
+            "npm:private"
+          ],
+          "implicitDependencies": []
+        }
+      },
+      "@hamsoya-monorepo/frontend-ui": {
+        "name": "@hamsoya-monorepo/frontend-ui",
+        "type": "lib",
+        "data": {
+          "root": "frontend-ui",
+          "targets": {
+            "lint": {
+              "cache": true,
+              "options": {
+                "cwd": "frontend-ui",
+                "command": "eslint ."
+              },
+              "inputs": [
+                "default",
+                "^default",
+                "{workspaceRoot}/eslint.config.mjs",
+                "{workspaceRoot}/frontend-ui/eslint.config.mjs",
+                "{workspaceRoot}/tools/eslint-rules/**/*",
+                {
+                  "externalDependencies": [
+                    "eslint"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{options.outputFile}"
+              ],
+              "metadata": {
+                "technologies": [
+                  "eslint"
+                ],
+                "description": "Runs ESLint on project",
+                "help": {
+                  "command": "bun eslint --help",
+                  "example": {
+                    "options": {
+                      "max-warnings": 0
+                    }
+                  }
+                }
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "build": {
+              "options": {
+                "cwd": "frontend-ui",
+                "tty": false,
+                "command": "next build"
+              },
+              "dependsOn": [
+                "^build"
+              ],
+              "cache": true,
+              "inputs": [
+                "default",
+                "^production",
+                {
+                  "externalDependencies": [
+                    "next"
+                  ]
+                }
+              ],
+              "outputs": [
+                "{workspaceRoot}/frontend-ui/.next/!(cache)/**/*",
+                "{workspaceRoot}/frontend-ui/.next/!(cache)"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "dev": {
+              "continuous": true,
+              "options": {
+                "cwd": "frontend-ui",
+                "command": "next dev"
+              },
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "start": {
+              "continuous": true,
+              "options": {
+                "cwd": "frontend-ui",
+                "command": "next start"
+              },
+              "dependsOn": [
+                "build"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "serve-static": {
+              "continuous": true,
+              "options": {
+                "cwd": "frontend-ui",
+                "command": "next start"
+              },
+              "dependsOn": [
+                "build"
+              ],
+              "executor": "nx:run-commands",
+              "configurations": {},
+              "parallelism": true
+            },
+            "build-deps": {
+              "dependsOn": [
+                "^build"
+              ],
+              "configurations": {},
+              "options": {},
+              "parallelism": true,
+              "executor": "nx:noop"
+            },
+            "watch-deps": {
+              "continuous": true,
+              "dependsOn": [
+                "build-deps"
+              ],
+              "executor": "nx:run-commands",
+              "options": {
+                "command": "bun nx watch --projects @hamsoya-monorepo/frontend-ui --includeDependentProjects -- bun nx build-deps @hamsoya-monorepo/frontend-ui"
+              },
+              "configurations": {},
+              "parallelism": true
+            }
+          },
+          "name": "@hamsoya-monorepo/frontend-ui",
+          "tags": [
+            "npm:private"
+          ],
+          "metadata": {
+            "targetGroups": {},
+            "js": {
+              "packageName": "@hamsoya-monorepo/frontend-ui",
+              "isInPackageManagerWorkspaces": true
+            }
+          },
+          "implicitDependencies": []
+        }
+      }
+    },
+    "dependencies": {
+      "@hamsoya-monorepo/auth-service-e2e": [
+        {
+          "source": "@hamsoya-monorepo/auth-service-e2e",
+          "target": "auth-service",
+          "type": "implicit"
+        }
+      ],
+      "prisma-client-587da6df7c02f59d16ee997425733b98bc89b1b5c0fbf33c31f06d61a4f8b2db": [],
+      "@hamsoya-monorepo/api-gateway-e2e": [
+        {
+          "source": "@hamsoya-monorepo/api-gateway-e2e",
+          "target": "@hamsoya-monorepo/api-gateway",
+          "type": "implicit"
+        }
+      ],
+      "auth-service": [],
+      "@hamsoya-monorepo/api-gateway": [],
+      "@hamsoya-monorepo/frontend-ui": []
+    }
+  }
+}

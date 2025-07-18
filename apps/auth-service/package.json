@@ -1,64 +1,64 @@
 {
-  "name": "@hamsoya-monorepo/auth-service",
+  "name": "@./auth-service",
   "version": "0.0.1",
   "private": true,
+  "prisma": {
+    "schema": "../../prisma/schema.prisma"
+  },
+  "scripts": {
+    "dev": "bun run src/main.ts"
+  },
   "nx": {
+    "name": "auth-service",
+    "projectType": "application",
+    "sourceRoot": "auth-service/src",
     "targets": {
       "build": {
-        "executor": "@nx/esbuild:esbuild",
+        "executor": "@nx/webpack:webpack",
         "outputs": [
           "{options.outputPath}"
         ],
         "defaultConfiguration": "production",
         "options": {
-          "platform": "node",
+          "target": "node",
+          "compiler": "tsc",
           "outputPath": "apps/auth-service/dist",
-          "format": [
-            "cjs"
-          ],
-          "bundle": false,
           "main": "apps/auth-service/src/main.ts",
           "tsConfig": "apps/auth-service/tsconfig.app.json",
-          "assets": [
-            "apps/auth-service/src/assets"
-          ],
-          "esbuildOptions": {
-            "sourcemap": true,
-            "outExtension": {
-              ".js": ".js"
-            }
-          }
+          "assets": [],
+          "webpackConfig": "apps/auth-service/webpack.config.js"
         },
         "configurations": {
-          "development": {},
+          "development": {
+            "extractLicenses": false,
+            "optimization": false,
+            "sourceMap": true,
+            "vendorChunk": true
+          },
           "production": {
-            "generateLockfile": true,
-            "esbuildOptions": {
-              "sourcemap": false,
-              "outExtension": {
-                ".js": ".js"
-              }
-            }
+            "extractLicenses": true,
+            "optimization": true,
+            "sourceMap": false,
+            "vendorChunk": false
           }
         }
       },
       "serve": {
-        "continuous": true,
         "executor": "@nx/js:node",
         "defaultConfiguration": "development",
         "dependsOn": [
           "build"
         ],
         "options": {
-          "buildTarget": "@hamsoya-monorepo/auth-service:build",
+          "buildTarget": "auth-service:build",
           "runBuildTargetDependencies": false
         },
         "configurations": {
           "development": {
-            "buildTarget": "@hamsoya-monorepo/auth-service:build:development"
+            "buildTarget": "auth-service:build:development"
           },
           "production": {
-            "buildTarget": "@hamsoya-monorepo/auth-service:build:production"
+            "buildTarget": "auth-service:build:production"
           }
         }
       },
@@ -66,13 +66,13 @@
         "options": {
           "passWithNoTests": true
         }
-      },
-      "docker-build": {
-        "dependsOn": [
-          "build"
-        ],
-        "command": "docker build -f apps/auth-service/Dockerfile . -t hamsoya-monorepo-auth-service"
       }
     }
+  },
+  "dependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.10",
+    "bcrypt": "^6.0.0",
+    "jsonwebtoken": "^9.0.2"
   }
 }
