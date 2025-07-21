@@ -14,7 +14,7 @@ interface AuthRouteGuardProps {
  * Client-side route guard that prevents:
  * - Authenticated users from accessing auth pages (login, signup, etc.)
  * - Unauthenticated users from accessing protected routes
- * 
+ *
  * Uses cached Redux state for instant redirects without loading states
  */
 export const AuthRouteGuard: React.FC<AuthRouteGuardProps> = ({
@@ -30,7 +30,7 @@ export const AuthRouteGuard: React.FC<AuthRouteGuardProps> = ({
   const { isAuthenticated, isInitialized } = useAppSelector(
     (state) => state.auth
   );
-  
+
   // Get Redux Persist rehydration status
   const isRehydrated = useAppSelector(
     (state) => (state as any)._persist?.rehydrated ?? false
@@ -50,7 +50,7 @@ export const AuthRouteGuard: React.FC<AuthRouteGuardProps> = ({
     // For auth pages (login, signup): redirect authenticated users
     if (!requireAuth && isAuthenticated && isInitialized) {
       setHasRedirected(true);
-      
+
       // Use ViewTransition API for smooth navigation
       if ('startViewTransition' in document) {
         (document as any).startViewTransition(() => {
@@ -65,7 +65,7 @@ export const AuthRouteGuard: React.FC<AuthRouteGuardProps> = ({
     // For protected routes: redirect unauthenticated users
     if (requireAuth && !isAuthenticated && isInitialized) {
       setHasRedirected(true);
-      
+
       // Use ViewTransition API for smooth navigation
       if ('startViewTransition' in document) {
         (document as any).startViewTransition(() => {
@@ -122,7 +122,7 @@ export const AuthRouteGuard: React.FC<AuthRouteGuardProps> = ({
  */
 export const withAuthPageGuard = <P extends object>(
   Component: React.ComponentType<P>,
-  redirectTo: string = '/'
+  redirectTo = '/'
 ) => {
   const GuardedComponent = (props: P) => (
     <AuthRouteGuard requireAuth={false} redirectTo={redirectTo}>
@@ -130,7 +130,9 @@ export const withAuthPageGuard = <P extends object>(
     </AuthRouteGuard>
   );
 
-  GuardedComponent.displayName = `withAuthPageGuard(${Component.displayName || Component.name})`;
+  GuardedComponent.displayName = `withAuthPageGuard(${
+    Component.displayName || Component.name
+  })`;
   return GuardedComponent;
 };
 
@@ -140,7 +142,7 @@ export const withAuthPageGuard = <P extends object>(
  */
 export const withProtectedRouteGuard = <P extends object>(
   Component: React.ComponentType<P>,
-  redirectTo: string = '/login'
+  redirectTo = '/login'
 ) => {
   const GuardedComponent = (props: P) => (
     <AuthRouteGuard requireAuth={true} redirectTo={redirectTo}>
@@ -148,6 +150,8 @@ export const withProtectedRouteGuard = <P extends object>(
     </AuthRouteGuard>
   );
 
-  GuardedComponent.displayName = `withProtectedRouteGuard(${Component.displayName || Component.name})`;
+  GuardedComponent.displayName = `withProtectedRouteGuard(${
+    Component.displayName || Component.name
+  })`;
   return GuardedComponent;
 };
