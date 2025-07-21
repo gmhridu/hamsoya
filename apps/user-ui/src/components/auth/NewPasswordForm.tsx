@@ -59,7 +59,7 @@ export const NewPasswordForm: React.FC<NewPasswordFormProps> = ({
   const handleSubmit = async (data: NewPasswordFormData) => {
     try {
       await onSubmit(data.newPassword);
-    } catch (error) {
+    } catch {
       // Error handling is managed by parent component
     }
   };
@@ -281,7 +281,9 @@ export const NewPasswordForm: React.FC<NewPasswordFormProps> = ({
                       variant="ghost"
                       size="sm"
                       className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                     >
                       {showConfirmPassword ? (
                         <EyeOff className="w-4 h-4 text-gray-400" />

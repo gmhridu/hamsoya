@@ -1,5 +1,5 @@
-import axios, { AxiosError } from 'axios';
-import { AuthResponse, LoginRequest, SignupRequest } from '../types/auth';
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import { AuthResponse, LoginRequest, SignupRequest, User } from '../types/auth';
 import { serverConfig } from './server-config';
 
 const serverApiClient = axios.create({
@@ -18,7 +18,10 @@ serverApiClient.interceptors.response.use(
 
     if (error.response) {
       statusCode = error.response.status;
-      const errorData = error.response.data as any;
+      const errorData = error.response.data as {
+        message?: string;
+        error?: string;
+      };
 
       switch (statusCode) {
         case 400:
@@ -68,7 +71,10 @@ serverApiClient.interceptors.response.use(
       method: error.config?.method,
     });
 
-    const standardError = new Error(message) as any;
+    const standardError = new Error(message) as Error & {
+      statusCode: number;
+      originalError: AxiosError;
+    };
     standardError.statusCode = statusCode;
     standardError.originalError = error;
 
@@ -86,7 +92,9 @@ class ServerAuthAPI {
     return response.data;
   }
 
-  async login(data: LoginRequest): Promise<AuthResponse> {
+  async login(
+    data: LoginRequest
+  ): Promise<AuthResponse & { cookies?: string[] }> {
     const response = await serverApiClient.post(
       '/login-user',
       {
@@ -97,7 +105,14 @@ class ServerAuthAPI {
         withCredentials: true,
       }
     );
-    return response.data;
+
+    // Extract cookies from response headers
+    const cookies = response.headers['set-cookie'] || [];
+
+    return {
+      ...response.data,
+      cookies,
+    };
   }
 
   async verifyOTP(data: {
@@ -161,8 +176,8 @@ class ServerAuthAPI {
 
   async getCurrentUser(
     cookieHeader?: string
-  ): Promise<{ success: boolean; user?: any }> {
-    const config: any = {
+  ): Promise<{ success: boolean; user?: User }> {
+    const config: AxiosRequestConfig = {
       withCredentials: true,
     };
 
@@ -186,8 +201,10 @@ class ServerAuthAPI {
     };
   }
 
-  async refreshToken(cookieHeader?: string): Promise<AuthResponse> {
-    const config: any = {
+  async refreshToken(
+    cookieHeader?: string
+  ): Promise<AuthResponse & { cookies?: string[] }> {
+    const config: AxiosRequestConfig = {
       withCredentials: true,
     };
 
@@ -203,7 +220,14 @@ class ServerAuthAPI {
       {},
       config
     );
-    return response.data;
+
+    // Extract cookies from response headers
+    const cookies = response.headers['set-cookie'] || [];
+
+    return {
+      ...response.data,
+      cookies,
+    };
   }
 
   async verifyEmail(data: { token: string }): Promise<AuthResponse> {

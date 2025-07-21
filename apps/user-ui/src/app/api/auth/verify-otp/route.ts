@@ -52,12 +52,10 @@ export async function POST(request: NextRequest) {
     }
 
     return response;
-  } catch (error: any) {
-    console.error('OTP Verification API Error:', error);
-
+  } catch (error) {
     // Extract status code and message from error
-    const statusCode = error.statusCode || 500;
-    const message = error.message || 'Internal server error';
+    const statusCode = (error as { statusCode?: number }).statusCode || 500;
+    const message = (error as Error).message || 'Internal server error';
 
     return NextResponse.json(
       {

@@ -1,5 +1,5 @@
-import axios, { AxiosError } from 'axios';
-import { AuthResponse, LoginRequest, SignupRequest } from '../types/auth';
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import { AuthResponse, LoginRequest, SignupRequest, User } from '../types/auth';
 
 // Configure axios instance for Next.js API routes
 const apiClient = axios.create({
@@ -49,7 +49,9 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as any;
+    const originalRequest = error.config as AxiosRequestConfig & {
+      _retry?: boolean;
+    };
     let message = 'An unexpected error occurred';
 
     if (error.code === 'ECONNABORTED') {
@@ -59,7 +61,7 @@ apiClient.interceptors.response.use(
     } else if (error.response) {
       // Server responded with error status
       const status = error.response.status;
-      const data = error.response.data as any;
+      const data = error.response.data as { message?: string; error?: string };
 
       // Handle 401 errors with token refresh
       if (status === 401 && !originalRequest._retry) {
@@ -76,7 +78,9 @@ apiClient.interceptors.response.use(
             // If already refreshing, queue this request
             return new Promise((resolve) => {
               subscribeTokenRefresh((token: string) => {
-                originalRequest.headers.Authorization = `Bearer ${token}`;
+                if (originalRequest.headers) {
+                  originalRequest.headers.Authorization = `Bearer ${token}`;
+                }
                 resolve(apiClient(originalRequest));
               });
             });
@@ -86,24 +90,37 @@ apiClient.interceptors.response.use(
 
           try {
             // Attempt to refresh the token via Next.js API route
-            // This will handle cookie-based refresh and return the new token
             const refreshResponse = await apiClient.post('/refresh-token');
 
             if (refreshResponse.data.success) {
               // The new access token is now set in HTTP-only cookies
-              // We don't need to manage it manually anymore
-              delete originalRequest.headers.Authorization;
+              // Clear any authorization headers since we use cookies
+              if (originalRequest.headers) {
+                delete originalRequest.headers.Authorization;
+              }
 
               // Execute queued requests (they will get the token from cookies)
               onRefreshSuccess('refreshed');
 
+              // Auth queries will be invalidated by RTK Query automatically
+
               // Retry the original request
               return apiClient(originalRequest);
+            } else {
+              throw new Error(
+                refreshResponse.data.message || 'Token refresh failed'
+              );
             }
           } catch (refreshError) {
             // Refresh failed, logout user
             handleLogout();
-            throw new Error('Session expired. Please login again.');
+
+            // Auth cache will be cleared by Redux automatically
+
+            throw new Error(
+              (refreshError as Error).message ||
+                'Session expired. Please login again.'
+            );
           } finally {
             isRefreshing = false;
           }
@@ -203,7 +220,7 @@ class AuthAPI {
     return response.data;
   }
 
-  async getCurrentUser(): Promise<{ success: boolean; user?: any }> {
+  async getCurrentUser(): Promise<{ success: boolean; user?: User }> {
     const response = await apiClient.get('/user');
     return response.data;
   }
@@ -233,15 +250,9 @@ class AuthAPI {
   }
 
   async logout(): Promise<{ success: boolean; message: string }> {
-    try {
-      const response = await apiClient.post('/logout');
-      // HTTP-only cookies are cleared by the server
-      return response.data;
-    } catch (error) {
-      // Even if logout fails on server, the cookies should be cleared
-      // by the logout endpoint
-      throw error;
-    }
+    const response = await apiClient.post('/logout');
+    // HTTP-only cookies are cleared by the server
+    return response.data;
   }
 
   async refreshToken(): Promise<AuthResponse> {

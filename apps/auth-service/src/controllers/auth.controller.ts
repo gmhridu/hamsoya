@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { NextFunction, Request, Response } from 'express';
-import jwt, { JsonWebTokenError } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import prisma from '../../../../packages/libs/prisma/index';
 import {
   checkOtpRestrictions,
@@ -163,7 +163,7 @@ export const refreshToken = async (
     const refreshToken = req.cookies.refresh_token;
 
     if (!refreshToken) {
-      return new ValidationError('Unatuhorized! No Refresh Token.');
+      return next(new ValidationError('Unauthorized! No Refresh Token.'));
     }
 
     const decoded = jwt.verify(
@@ -172,18 +172,13 @@ export const refreshToken = async (
     ) as jwt.JwtPayload;
 
     if (!decoded || !decoded.id || !decoded.role) {
-      return new JsonWebTokenError('Forbidden! Invalid refresh token.');
+      return next(new AuthError('Forbidden! Invalid refresh token.'));
     }
 
-    // let account;
-
-    // if(decoded.role === 'user') {
-    //   account = await prisma.users.findUnique({ where: { id: decoded.id } });
-    // }
     const user = await prisma.users.findUnique({ where: { id: decoded.id } });
 
     if (!user) {
-      return new AuthError('Forbidden! User/Seller not found!');
+      return next(new AuthError('Forbidden! User not found!'));
     }
 
     const newAccessToken = jwt.sign(
@@ -197,10 +192,27 @@ export const refreshToken = async (
       }
     );
 
-    setCookie(res, 'access_token', newAccessToken);
+    // Generate new refresh token for rotation
+    const newRefreshToken = jwt.sign(
+      {
+        id: decoded.id,
+        role: decoded.role,
+      },
+      process.env.REFRESH_TOKEN_SECRET as string,
+      {
+        expiresIn: '7d',
+      }
+    );
 
-    res.status(201).json({
+    // Set cookies with new tokens
+    setCookie(res, 'access_token', newAccessToken);
+    setCookie(res, 'refresh_token', newRefreshToken);
+
+    res.status(200).json({
       success: true,
+      message: 'Token refreshed successfully',
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
     });
   } catch (error) {
     return next(error);
@@ -208,7 +220,7 @@ export const refreshToken = async (
 };
 
 // get logged in user
-export const getUser = async(req: any, res: Response, next: NextFunction) => {
+export const getUser = async (req: any, res: Response, next: NextFunction) => {
   try {
     const user = req.user;
 

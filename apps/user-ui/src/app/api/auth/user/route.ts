@@ -23,12 +23,10 @@ export async function GET(request: NextRequest) {
 
     // Return user data
     return NextResponse.json(result, { status: 200 });
-  } catch (error: any) {
-    console.error('Get User API Error:', error);
-
+  } catch (error) {
     // Extract status code and message from error
-    const statusCode = error.statusCode || 401;
-    const message = error.message || 'Authentication failed';
+    const statusCode = (error as { statusCode?: number }).statusCode || 401;
+    const message = (error as Error).message || 'Authentication failed';
 
     return NextResponse.json(
       {

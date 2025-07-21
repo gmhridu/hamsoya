@@ -47,7 +47,7 @@ export const EmailInputForm: React.FC<EmailInputFormProps> = ({
   const handleSubmit = async (data: ForgotPasswordFormData) => {
     try {
       await onSubmit(data);
-    } catch (error) {
+    } catch {
       // Error handling is managed by parent component
     }
   };
@@ -155,7 +155,9 @@ export const EmailInputForm: React.FC<EmailInputFormProps> = ({
           <div className="text-blue-700 text-sm">
             <p className="font-medium mb-1">What happens next?</p>
             <ul className="space-y-1 text-blue-600">
-              <li>• We'll send a 6-digit verification code to your email</li>
+              <li>
+                • We&apos;ll send a 6-digit verification code to your email
+              </li>
               <li>• Enter the code to verify your identity</li>
               <li>• Create a new secure password</li>
             </ul>

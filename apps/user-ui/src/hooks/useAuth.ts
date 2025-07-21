@@ -1,124 +1,167 @@
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { authAPI } from '../lib/auth-api';
-import { queryKeys } from '../lib/query-config';
-import { AuthResponse, LoginRequest, SignupRequest } from '../types/auth';
+import {
+  useResendOtpMutation,
+  useForgotPasswordMutation as useRTKForgotPasswordMutation,
+  useLoginMutation as useRTKLoginMutation,
+  useLogoutMutation as useRTKLogoutMutation,
+  useResetPasswordMutation as useRTKResetPasswordMutation,
+  useSignupMutation as useRTKSignupMutation,
+  useVerifyForgotPasswordOtpMutation,
+  useVerifyOtpMutation,
+} from '../store/authApi';
+import { clearAuth, setUser } from '../store/authSlice';
+import { useAppDispatch } from '../store/hooks';
+import { LoginRequest } from '../types/auth';
 
 export const useSignupMutation = () => {
-  return useMutation({
-    mutationFn: (data: SignupRequest): Promise<AuthResponse> =>
-      authAPI.signup(data),
-  });
+  return useRTKSignupMutation();
 };
 
 export const useLoginMutation = () => {
+  const dispatch = useAppDispatch();
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const [login, { isLoading, error }] = useRTKLoginMutation();
 
-  return useMutation({
-    mutationFn: (data: LoginRequest): Promise<AuthResponse> =>
-      authAPI.login(data),
-    onSuccess: (data) => {
-      // Store user data in query cache for persistence
-      if (data.user) {
-        queryClient.setQueryData(queryKeys.auth.user, data.user);
+  const handleLogin = async (data: LoginRequest) => {
+    try {
+      const result = await login(data).unwrap();
+
+      // OPTIMIZATION: Set user data in Redux store immediately for instant UI updates
+      if (result.user) {
+        dispatch(setUser(result.user));
       }
 
-      // Tokens are automatically stored in HTTP-only cookies by the backend
-      // Invalidate auth status to trigger re-fetch
-      queryClient.invalidateQueries({ queryKey: ['auth', 'status'] });
+      // OPTIMIZATION: Use ViewTransition API for smooth navigation
+      if ('startViewTransition' in document) {
+        (document as any).startViewTransition(() => {
+          router.replace('/');
+        });
+      } else {
+        router.replace('/');
+      }
 
-      router.push('/');
-    },
-    onError: () => {
+      return result;
+    } catch (error) {
       // Clear any partial auth state on login failure
-      queryClient.removeQueries({ queryKey: queryKeys.auth.user });
-      queryClient.removeQueries({ queryKey: ['auth', 'status'] });
-    },
-  });
+      dispatch(clearAuth());
+      throw error;
+    }
+  };
+
+  return {
+    mutate: handleLogin,
+    mutateAsync: handleLogin,
+    isLoading,
+    error,
+    isError: !!error,
+    isSuccess: !isLoading && !error,
+  };
 };
 
 export const useOTPVerificationMutation = () => {
   const router = useRouter();
+  const [verifyOtp, { isLoading, error }] = useVerifyOtpMutation();
 
-  return useMutation({
-    mutationFn: (data: {
-      email: string;
-      otp: string;
-      password: string;
-      name: string;
-    }): Promise<AuthResponse> => authAPI.verifyOTP(data),
-    onSuccess: () => {
-      router.push('/login');
-    },
-  });
+  const handleVerifyOTP = async (data: {
+    email: string;
+    otp: string;
+    password: string;
+    name: string;
+  }) => {
+    const result = await verifyOtp(data).unwrap();
+    router.push('/login');
+    return result;
+  };
+
+  return {
+    mutate: handleVerifyOTP,
+    mutateAsync: handleVerifyOTP,
+    isLoading,
+    error,
+    isError: !!error,
+    isSuccess: !isLoading && !error,
+  };
 };
 
 export const useOTPResendMutation = () => {
-  return useMutation({
-    mutationFn: (data: {
-      email: string;
-    }): Promise<{ success: boolean; message: string }> =>
-      authAPI.resendOTP(data),
-  });
+  return useResendOtpMutation();
 };
 
 export const useForgotPasswordMutation = () => {
-  return useMutation({
-    mutationFn: (
-      email: string
-    ): Promise<{ success: boolean; message: string }> =>
-      authAPI.forgotPassword(email),
-  });
+  return useRTKForgotPasswordMutation();
 };
 
 export const useVerifyForgotPasswordOTPMutation = () => {
-  return useMutation({
-    mutationFn: (data: {
-      email: string;
-      otp: string;
-    }): Promise<{ success: boolean; message: string }> =>
-      authAPI.verifyForgotPasswordOTP(data),
-  });
+  const [verifyForgotPasswordOtp, { isLoading, error }] =
+    useVerifyForgotPasswordOtpMutation();
+
+  const handleVerifyForgotPasswordOTP = async (data: {
+    email: string;
+    otp: string;
+  }) => {
+    const result = await verifyForgotPasswordOtp(data).unwrap();
+    return result;
+  };
+
+  return {
+    mutate: handleVerifyForgotPasswordOTP,
+    mutateAsync: handleVerifyForgotPasswordOTP,
+    isLoading,
+    error,
+    isError: !!error,
+    isSuccess: !isLoading && !error,
+  };
 };
 
 export const useResetPasswordMutation = () => {
-  return useMutation({
-    mutationFn: (data: {
-      email: string;
-      otp: string;
-      newPassword: string;
-    }): Promise<{ success: boolean; message: string }> =>
-      authAPI.resetPassword(data),
-  });
+  return useRTKResetPasswordMutation();
 };
 
 export const useLogoutMutation = () => {
+  const dispatch = useAppDispatch();
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const [logout, { isLoading, error }] = useRTKLogoutMutation();
 
-  return useMutation({
-    mutationFn: (): Promise<{ success: boolean; message: string }> =>
-      authAPI.logout(),
-    onSuccess: () => {
-      // Clear all auth-related queries from TanStack Query cache
-      queryClient.removeQueries({ queryKey: queryKeys.auth.user });
-      queryClient.removeQueries({ queryKey: queryKeys.auth.session });
-      queryClient.removeQueries({ queryKey: ['auth', 'status'] });
+  const handleLogout = async () => {
+    try {
+      // OPTIMIZATION: Clear auth state immediately for instant UI updates
+      dispatch(clearAuth());
 
-      // HTTP-only cookies are cleared by the server
-      router.push('/login');
-    },
-    onError: () => {
-      // Even if logout fails, clear local state
-      queryClient.removeQueries({ queryKey: queryKeys.auth.user });
-      queryClient.removeQueries({ queryKey: queryKeys.auth.session });
-      queryClient.removeQueries({ queryKey: ['auth', 'status'] });
+      // Call logout API in background
+      await logout().unwrap();
 
-      // Redirect anyway since cookies should be cleared
-      router.push('/login');
-    },
-  });
+      // OPTIMIZATION: Use ViewTransition API for smooth navigation to login
+      if ('startViewTransition' in document) {
+        (document as any).startViewTransition(() => {
+          router.replace('/login');
+        });
+      } else {
+        router.replace('/login');
+      }
+    } catch (error) {
+      // Even if logout fails, ensure auth state is cleared and redirect for security
+      dispatch(clearAuth());
+
+      if ('startViewTransition' in document) {
+        (document as any).startViewTransition(() => {
+          router.replace('/login');
+        });
+      } else {
+        router.replace('/login');
+      }
+
+      throw error;
+    }
+  };
+
+  return {
+    mutate: handleLogout,
+    mutateAsync: handleLogout,
+    isLoading,
+    error,
+    isError: !!error,
+    isSuccess: !isLoading && !error,
+  };
 };

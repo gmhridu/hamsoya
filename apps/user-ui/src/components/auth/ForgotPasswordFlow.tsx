@@ -3,16 +3,15 @@
 import React, { useState } from 'react';
 import {
   useForgotPasswordMutation,
-  useOTPResendMutation,
   useResetPasswordMutation,
   useVerifyForgotPasswordOTPMutation,
 } from '../../hooks/useAuth';
 import { toast } from '../../lib/toast';
 import { ForgotPasswordFormData } from '../../lib/validations/auth';
+import { useResendOtpMutation } from '../../store/authApi';
 import { EmailInputForm } from './EmailInputForm';
 import { ForgotPasswordOTPVerification } from './ForgotPasswordOTPVerification';
 import { NewPasswordForm } from './NewPasswordForm';
-
 
 export interface ForgotPasswordFlowProps {
   className?: string;
@@ -32,18 +31,20 @@ export const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = () => {
   const [otpError, setOtpError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
-  // React Query mutations
-  const forgotPasswordMutation = useForgotPasswordMutation();
+  // RTK Query mutations
+  const [forgotPasswordMutation, { isLoading: isForgotPasswordLoading }] =
+    useForgotPasswordMutation();
   const verifyOTPMutation = useVerifyForgotPasswordOTPMutation();
-  const resetPasswordMutation = useResetPasswordMutation();
-  const otpResendMutation = useOTPResendMutation();
+  const [resetPasswordMutation, { isLoading: isResetPasswordLoading }] =
+    useResetPasswordMutation();
+  const [otpResendMutation] = useResendOtpMutation();
 
   const handleEmailSubmit = async (data: ForgotPasswordFormData) => {
     setEmail(data.email);
     setEmailError(null);
 
     try {
-      await forgotPasswordMutation.mutateAsync(data.email);
+      await forgotPasswordMutation({ email: data.email }).unwrap();
 
       toast.success('Verification code sent!', {
         description: 'Please check your email for the OTP code.',
@@ -91,7 +92,7 @@ export const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = () => {
 
   const handleOTPResend = async () => {
     try {
-      await otpResendMutation.mutateAsync({ email });
+      await otpResendMutation({ email }).unwrap();
 
       toast.success('New code sent!', {
         description: 'Please check your email for the new OTP code.',
@@ -111,11 +112,11 @@ export const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = () => {
     setPasswordError(null);
 
     try {
-      await resetPasswordMutation.mutateAsync({
+      await resetPasswordMutation({
         email,
         otp: verifiedOTP,
         newPassword,
-      });
+      }).unwrap();
 
       toast.success('Password reset successful!', {
         description: 'You can now login with your new password.',
@@ -154,7 +155,7 @@ export const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = () => {
     return (
       <EmailInputForm
         onSubmit={handleEmailSubmit}
-        isLoading={forgotPasswordMutation.isPending}
+        isLoading={isForgotPasswordLoading}
         error={emailError}
       />
     );
@@ -168,7 +169,7 @@ export const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = () => {
         onVerify={handleOTPVerify}
         onResend={handleOTPResend}
         onBack={handleBackToEmail}
-        isLoading={verifyOTPMutation.isPending}
+        isLoading={verifyOTPMutation.isLoading}
         error={otpError}
       />
     );
@@ -182,7 +183,7 @@ export const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = () => {
         otp={verifiedOTP}
         onSubmit={handlePasswordReset}
         onBack={handleBackToOTP}
-        isLoading={resetPasswordMutation.isPending}
+        isLoading={isResetPasswordLoading}
         error={passwordError}
       />
     );
@@ -213,7 +214,8 @@ export const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = () => {
             Password Reset Complete!
           </h2>
           <p className="text-gray-600">
-            Your password has been successfully reset. You will be redirected to the login page.
+            Your password has been successfully reset. You will be redirected to
+            the login page.
           </p>
         </div>
       </div>

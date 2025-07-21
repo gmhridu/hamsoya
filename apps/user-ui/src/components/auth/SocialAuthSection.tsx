@@ -28,12 +28,6 @@ export const SocialAuthSection: React.FC<SocialAuthSectionProps> = ({
       // Mock API call - replace with actual social authentication integration
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      console.log(`${mode} with ${provider}:`, {
-        provider,
-        mode,
-        timestamp: new Date().toISOString(),
-      });
-
       // Show success message
       alert(
         `${
@@ -46,8 +40,7 @@ export const SocialAuthSection: React.FC<SocialAuthSectionProps> = ({
       // - Handle authentication response
       // - Store tokens and user data
       // - Redirect to dashboard or appropriate page
-    } catch (error) {
-      console.error(`${provider} ${mode} error:`, error);
+    } catch {
       alert(`Failed to ${mode} with ${provider}. Please try again.`);
     } finally {
       setLoadingProvider(null);

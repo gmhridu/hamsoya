@@ -2,12 +2,13 @@
 
 import React, { useState } from 'react';
 import {
-  useOTPResendMutation,
   useOTPVerificationMutation,
   useSignupMutation,
 } from '../../hooks/useAuth';
 import { toast } from '../../lib/toast';
 import { SignupFormData } from '../../lib/validations/auth';
+import { useResendOtpMutation } from '../../store/authApi';
+import type { LoginRequest, SignupRequest } from '../../types/auth';
 import { AuthForm } from './AuthForm';
 import { OTPVerification } from './OTPVerification';
 
@@ -26,21 +27,27 @@ export const SignupFlow: React.FC<SignupFlowProps> = () => {
   const [signupData, setSignupData] = useState<SignupFormData | null>(null);
   const [otpError, setOtpError] = useState<string | null>(null);
 
-  // React Query mutations
-  const signupMutation = useSignupMutation();
+  // RTK Query mutations
+  const [signupMutation] = useSignupMutation();
   const otpVerificationMutation = useOTPVerificationMutation();
-  const otpResendMutation = useOTPResendMutation();
+  const [otpResendMutation] = useResendOtpMutation();
 
-  const handleSignupSubmit = async (data: SignupFormData) => {
+  const handleSignupSubmit = async (data: SignupRequest | LoginRequest) => {
+    // Type guard to ensure we have signup data
+    if (!('name' in data)) {
+      throw new Error('Invalid signup data');
+    }
+
+    const signupData = data as SignupRequest;
     // Store signup data for OTP verification
-    setSignupData(data);
+    setSignupData(signupData as SignupFormData);
 
     // Call real signup API
-    await signupMutation.mutateAsync({
-      name: data.name,
-      email: data.email,
-      password: data.password,
-    });
+    await signupMutation({
+      name: signupData.name,
+      email: signupData.email,
+      password: signupData.password,
+    }).unwrap();
 
     // Move to OTP verification step
     setCurrentStep('otp');
@@ -84,9 +91,9 @@ export const SignupFlow: React.FC<SignupFlowProps> = () => {
 
     try {
       // Call real OTP resend API (now only requires email)
-      await otpResendMutation.mutateAsync({
+      await otpResendMutation({
         email: signupData.email,
-      });
+      }).unwrap();
 
       setOtpError(null);
 
@@ -120,7 +127,7 @@ export const SignupFlow: React.FC<SignupFlowProps> = () => {
           onVerify={handleOtpVerify}
           onResend={handleOtpResend}
           onBack={handleBackToForm}
-          isLoading={otpVerificationMutation.isPending}
+          isLoading={otpVerificationMutation.isLoading}
           error={otpError}
         />
       </div>

@@ -1,19 +1,5 @@
 import { Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
-
-const SignupPageWrapper = dynamicImport(
-  () =>
-    import('../../components/auth/SignupPageWrapper').then((mod) => ({
-      default: mod.SignupPageWrapper,
-    })),
-  {
-    loading: () => (
-      <main className="min-h-screen bg-gradient-to-br from-brand-primary via-brand-primary/90 to-brand-secondary relative overflow-hidden flex items-center justify-center">
-        <div className="text-white text-lg">Loading...</div>
-      </main>
-    ),
-  }
-);
+import { SignupPageWrapper } from '../../components/auth/SignupPageWrapper';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +11,8 @@ export const metadata: Metadata = {
 
 /**
  * Signup Page - Server Component
- * Provides SEO-optimized signup page with client-side form functionality and route protection
+ * Provides SEO-optimized signup page with instant authentication checks and no loading states
+ * Eliminates white screen flashes by removing dynamic imports and loading states
  */
 export default function SignupPage() {
   return <SignupPageWrapper />;

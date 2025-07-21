@@ -2,7 +2,6 @@
 
 import { Home } from 'lucide-react';
 import Link from 'next/link';
-import { useRedirectIfAuthenticated } from '../../hooks/useAuthState';
 import {
   Card,
   CardContent,
@@ -11,31 +10,26 @@ import {
   CardTitle,
 } from '../ui/card';
 import { AuthForm } from './AuthForm';
+import { withEnhancedAuthPageGuard } from './EnhancedAuthRouteGuard';
 
 /**
- * Client-side wrapper for login page with route protection
- * Redirects authenticated users away from login page
+ * Optimized login page component with instant authentication checks
+ * Uses route guard to prevent authenticated users from accessing login page
+ * Eliminates white screen flashes and unnecessary loading states
  */
-export const LoginPageWrapper = () => {
-  const { isLoading } = useRedirectIfAuthenticated('/');
-
-  // Show loading state while checking authentication
-  if (isLoading) {
-    return (
-      <main className="min-h-screen bg-gradient-to-br from-brand-secondary via-brand-secondary/90 to-brand-accent relative overflow-hidden flex items-center justify-center">
-        <div className="text-white text-lg">Loading...</div>
-      </main>
-    );
-  }
-
+const LoginPageContent = () => {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-brand-secondary via-brand-secondary/90 to-brand-accent relative overflow-hidden">
+    <main
+      className="min-h-screen bg-gradient-to-br from-brand-secondary via-brand-secondary/90 to-brand-accent relative overflow-hidden"
+      style={{ viewTransitionName: 'auth-main' }}
+    >
       {/* Background Pattern */}
       <div
         className="absolute inset-0"
         style={{
           background:
             'radial-gradient(circle at 30% 70%, rgba(251, 191, 36, 0.3) 0%, transparent 50%), radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%)',
+          viewTransitionName: 'auth-background',
         }}
       />
 
@@ -43,7 +37,10 @@ export const LoginPageWrapper = () => {
       <div className="absolute inset-0 bg-black/10" />
 
       {/* Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+      <div
+        className="relative z-10 min-h-screen flex items-center justify-center p-4"
+        style={{ viewTransitionName: 'auth-content' }}
+      >
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="text-center mb-8">
@@ -100,3 +97,9 @@ export const LoginPageWrapper = () => {
     </main>
   );
 };
+
+// Export the component wrapped with enhanced auth page guard
+export const LoginPageWrapper = withEnhancedAuthPageGuard(
+  LoginPageContent,
+  'login'
+);

@@ -28,12 +28,10 @@ export async function POST(request: NextRequest) {
 
     // Return success response
     return NextResponse.json(result, { status: 200 });
-  } catch (error: any) {
-    console.error('Reset Password API Error:', error);
-
+  } catch (error) {
     // Extract status code and message from error
-    const statusCode = error.statusCode || 500;
-    const message = error.message || 'Internal server error';
+    const statusCode = (error as { statusCode?: number }).statusCode || 500;
+    const message = (error as Error).message || 'Internal server error';
 
     return NextResponse.json(
       {

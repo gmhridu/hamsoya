@@ -1,5 +1,6 @@
 import { Sora, Space_Grotesk, Urbanist } from 'next/font/google';
 import { ConditionalHeader } from '../components/layout/ConditionalHeader';
+import { LoadingStateManager } from '../components/loading/LoadingStateManager';
 import { cn } from '../lib/utils';
 import './global.css';
 import Providers from './providers';
@@ -65,7 +66,7 @@ export default function RootLayout({
       >
         <Providers>
           <ConditionalHeader />
-          {children}
+          <LoadingStateManager>{children}</LoadingStateManager>
         </Providers>
       </body>
     </html>

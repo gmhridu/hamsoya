@@ -19,20 +19,67 @@ export async function POST(request: NextRequest) {
     }
 
     // Call backend auth service to refresh token
-    // Forward the cookies to the backend
     const result = await serverAuthAPI.refreshToken(cookieHeader);
 
-    // Create response - the backend already sets the new access_token cookie
-    // We just need to forward the success response
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: result.message || 'Token refresh failed',
+        },
+        { status: 401 }
+      );
+    }
+
+    // Create response
     const response = NextResponse.json(result, { status: 200 });
 
-    return response;
-  } catch (error: any) {
-    console.error('Refresh Token API Error:', error);
+    // Forward cookies from backend response if they exist
+    if (result.cookies && result.cookies.length > 0) {
+      result.cookies.forEach((cookie: string) => {
+        // Parse cookie string to extract name and value
+        const [nameValue] = cookie.split(';');
+        const [name, value] = nameValue.split('=');
 
+        if (name && value) {
+          // Set the cookie with appropriate options for frontend
+          response.cookies.set(name.trim(), value.trim(), {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: name.trim() === 'access_token' ? 15 * 60 : 7 * 24 * 60 * 60,
+            path: '/',
+          });
+        }
+      });
+    } else {
+      // Fallback: Set cookies from response data if backend cookies are not available
+      if (result.accessToken) {
+        response.cookies.set('access_token', result.accessToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 15 * 60, // 15 minutes
+          path: '/',
+        });
+      }
+
+      if (result.refreshToken) {
+        response.cookies.set('refresh_token', result.refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 7 * 24 * 60 * 60, // 7 days
+          path: '/',
+        });
+      }
+    }
+
+    return response;
+  } catch (error) {
     // Extract status code and message from error
-    const statusCode = error.statusCode || 401;
-    const message = error.message || 'Token refresh failed';
+    const statusCode = (error as { statusCode?: number }).statusCode || 401;
+    const message = (error as Error).message || 'Token refresh failed';
 
     return NextResponse.json(
       {

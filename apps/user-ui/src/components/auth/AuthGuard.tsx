@@ -1,9 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
-import { useAuthStatus, useUser } from '../../hooks/useAuthUser';
-import { useIsRestoring } from '../../providers/AuthProvider';
+import React, { useEffect } from 'react';
+import { useAppSelector } from '../../store/hooks';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -13,104 +12,63 @@ interface AuthGuardProps {
 }
 
 /**
- * AuthGuard component that protects routes based on authentication status
- * 
- * @param children - The content to render if authentication check passes
- * @param requireAuth - Whether authentication is required (default: true)
- * @param redirectTo - Where to redirect if auth check fails (default: '/login')
- * @param fallback - Component to show while checking auth status
+ * AuthGuard component for protecting routes
+ * Uses Redux state for authentication checks
  */
 export const AuthGuard: React.FC<AuthGuardProps> = ({
   children,
   requireAuth = true,
   redirectTo = '/login',
-  fallback = <AuthLoadingSpinner />,
+  fallback,
 }) => {
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useAuthStatus();
-  const { data: user, isLoading: userLoading } = useUser();
-  const isRestoring = useIsRestoring();
-  const [hasChecked, setHasChecked] = useState(false);
+  const { isAuthenticated, user, isInitialized } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    // Wait for restoration and initial auth check to complete
-    if (!isRestoring && !isLoading && !userLoading) {
-      setHasChecked(true);
-
-      if (requireAuth && !isAuthenticated) {
-        router.push(redirectTo);
-      } else if (!requireAuth && isAuthenticated) {
-        // Redirect authenticated users away from auth pages
-        router.push('/');
+    if (isInitialized) {
+      if (requireAuth && (!isAuthenticated || !user)) {
+        router.replace(redirectTo);
+      } else if (!requireAuth && isAuthenticated && user) {
+        router.replace('/');
       }
     }
-  }, [isRestoring, isLoading, userLoading, isAuthenticated, requireAuth, router, redirectTo]);
+  }, [isInitialized, isAuthenticated, user, requireAuth, redirectTo, router]);
 
-  // Show loading while checking auth status
-  if (isRestoring || isLoading || userLoading || !hasChecked) {
-    return <>{fallback}</>;
-  }
-
-  // Show content if auth check passes
-  if (requireAuth && isAuthenticated) {
-    return <>{children}</>;
-  }
-
-  if (!requireAuth && !isAuthenticated) {
-    return <>{children}</>;
-  }
-
-  // Don't render anything while redirecting
-  return <>{fallback}</>;
-};
-
-/**
- * Default loading spinner component
- */
-const AuthLoadingSpinner: React.FC = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-primary/5 via-white to-brand-secondary/5">
-      <div className="text-center space-y-4">
-        <div className="w-16 h-16 mx-auto">
-          <div className="w-full h-full border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin"></div>
-        </div>
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-gray-900">Loading...</h3>
-          <p className="text-gray-600 text-sm">Please wait while we verify your authentication</p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/**
- * Higher-order component for protecting pages
- */
-export const withAuthGuard = <P extends object>(
-  Component: React.ComponentType<P>,
-  options: {
-    requireAuth?: boolean;
-    redirectTo?: string;
-    fallback?: React.ReactNode;
-  } = {}
-) => {
-  const WrappedComponent: React.FC<P> = (props) => {
+  // Show loading state while initializing
+  if (!isInitialized) {
     return (
-      <AuthGuard {...options}>
-        <Component {...props} />
-      </AuthGuard>
+      fallback || (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="w-8 h-8 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mx-auto"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      )
     );
-  };
+  }
 
-  WrappedComponent.displayName = `withAuthGuard(${Component.displayName || Component.name})`;
+  // Don't render children if auth requirements aren't met
+  if (requireAuth && (!isAuthenticated || !user)) {
+    return null;
+  }
 
-  return WrappedComponent;
+  if (!requireAuth && isAuthenticated && user) {
+    return null;
+  }
+
+  return <>{children}</>;
 };
 
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
 /**
- * Component for protecting authenticated routes
+ * Simple wrapper for protected routes
  */
-export const ProtectedRoute: React.FC<{ children: React.ReactNode; fallback?: React.ReactNode }> = ({
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   fallback,
 }) => {
@@ -121,10 +79,15 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode; fallback?: Re
   );
 };
 
+interface PublicRouteProps {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
 /**
- * Component for protecting guest-only routes (login, signup, etc.)
+ * Simple wrapper for public routes (redirects authenticated users)
  */
-export const GuestOnlyRoute: React.FC<{ children: React.ReactNode; fallback?: React.ReactNode }> = ({
+export const PublicRoute: React.FC<PublicRouteProps> = ({
   children,
   fallback,
 }) => {
@@ -135,24 +98,4 @@ export const GuestOnlyRoute: React.FC<{ children: React.ReactNode; fallback?: Re
   );
 };
 
-/**
- * Hook for conditional rendering based on auth status
- */
-export const useAuthGuard = (requireAuth: boolean = true) => {
-  const { isAuthenticated, isLoading } = useAuthStatus();
-  const isRestoring = useIsRestoring();
-
-  const shouldRender = () => {
-    if (isRestoring || isLoading) {
-      return false;
-    }
-
-    return requireAuth ? isAuthenticated : !isAuthenticated;
-  };
-
-  return {
-    shouldRender: shouldRender(),
-    isLoading: isRestoring || isLoading,
-    isAuthenticated,
-  };
-};
+export default AuthGuard;

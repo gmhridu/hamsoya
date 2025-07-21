@@ -27,12 +27,12 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(result, { status: 200 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Verify User API Error:', error);
 
     // Extract status code and message from error
-    const statusCode = error.statusCode || 400;
-    const message = error.message || 'OTP verification failed';
+    const statusCode = (error as { statusCode?: number }).statusCode || 400;
+    const message = (error as Error).message || 'OTP verification failed';
 
     return NextResponse.json(
       {

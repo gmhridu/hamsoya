@@ -29,9 +29,7 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch (error: any) {
-    console.error('Logout API Error:', error);
-
+  } catch {
     // Even if backend logout fails, clear cookies on frontend
     const response = NextResponse.json(
       {

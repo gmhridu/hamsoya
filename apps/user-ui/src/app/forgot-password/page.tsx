@@ -1,19 +1,5 @@
 import { Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
-
-const ForgotPasswordPageWrapper = dynamicImport(
-  () =>
-    import('../../components/auth/ForgotPasswordPageWrapper').then((mod) => ({
-      default: mod.ForgotPasswordPageWrapper,
-    })),
-  {
-    loading: () => (
-      <main className="min-h-screen bg-gradient-to-br from-brand-primary via-brand-primary/90 to-brand-secondary relative overflow-hidden flex items-center justify-center">
-        <div className="text-white text-lg">Loading...</div>
-      </main>
-    ),
-  }
-);
+import { ForgotPasswordPageWrapper } from '../../components/auth/ForgotPasswordPageWrapper';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +36,8 @@ export const metadata: Metadata = {
 
 /**
  * Forgot Password Page - Server Component
- * Provides SEO-optimized forgot password page with client-side form functionality and route protection
+ * Provides SEO-optimized forgot password page with instant authentication checks and no loading states
+ * Eliminates white screen flashes by removing dynamic imports and loading states
  */
 export default function ForgotPasswordPage() {
   return <ForgotPasswordPageWrapper />;

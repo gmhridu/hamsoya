@@ -38,6 +38,7 @@ export interface AuthResponse {
   user?: User;
   accessToken?: string;
   refreshToken?: string;
+  cookies?: string[];
 }
 
 export interface AuthError {
@@ -124,7 +125,7 @@ export interface SocialAuthErrorDetails {
   code: SocialAuthError;
   message: string;
   provider: SocialProvider;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 // OTP Verification Types

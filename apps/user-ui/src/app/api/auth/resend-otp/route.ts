@@ -26,12 +26,12 @@ export async function POST(request: NextRequest) {
 
     // Return success response
     return NextResponse.json(result, { status: 200 });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Resend OTP API Error:', error);
 
     // Extract status code and message from error
-    const statusCode = error.statusCode || 500;
-    const message = error.message || 'Internal server error';
+    const statusCode = (error as { statusCode?: number }).statusCode || 500;
+    const message = (error as Error).message || 'Internal server error';
 
     return NextResponse.json(
       {

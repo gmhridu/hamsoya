@@ -69,7 +69,7 @@ export const OTPVerification: React.FC<OTPVerificationProps> = ({
   const handleSubmit = async (data: OTPVerificationFormData) => {
     try {
       await onVerify(data.otp);
-    } catch (error) {
+    } catch {
       // Error handling is managed by parent component
     }
   };
@@ -83,7 +83,7 @@ export const OTPVerification: React.FC<OTPVerificationProps> = ({
       setCountdown(60);
       setCanResend(false);
       form.setValue('otp', ''); // Clear OTP input
-    } catch (error) {
+    } catch {
       // Error handling is managed by parent component
     } finally {
       setIsResending(false);

@@ -38,7 +38,10 @@ export const validateName = (name: string): string | null => {
   return null;
 };
 
-export const validateConfirmPassword = (password: string, confirmPassword: string): string | null => {
+export const validateConfirmPassword = (
+  password: string,
+  confirmPassword: string
+): string | null => {
   if (!confirmPassword) {
     return 'Please confirm your password';
   }
@@ -49,18 +52,18 @@ export const validateConfirmPassword = (password: string, confirmPassword: strin
 };
 
 // Generic form validation helper
-export const validateForm = <T extends Record<string, any>>(
+export const validateForm = <T extends Record<string, unknown>>(
   data: T,
-  validators: Record<keyof T, (value: any) => string | null>
+  validators: Record<keyof T, (value: unknown) => string | null>
 ): Record<keyof T, string> => {
   const errors: Record<keyof T, string> = {} as Record<keyof T, string>;
-  
+
   for (const field in validators) {
     const error = validators[field](data[field]);
     if (error) {
       errors[field] = error;
     }
   }
-  
+
   return errors;
 };

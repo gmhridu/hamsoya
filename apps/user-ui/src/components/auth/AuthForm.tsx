@@ -3,17 +3,20 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useLoginMutation } from '../../hooks/useAuth';
 import { toast } from '../../lib/toast';
+import { useLoginMutation } from '../../store/authApi';
+import type { LoginRequest, SignupRequest } from '../../types/auth';
 
+import { useRouter } from 'next/navigation';
 import {
   loginSchema,
   signupSchema,
   type LoginFormData,
   type SignupFormData,
 } from '../../lib/validations/auth';
+import { useAppSelector } from '../../store';
 import { AuthMode } from '../../types/auth';
 import { Checkbox } from '../ui/checkbox';
 import {
@@ -30,7 +33,7 @@ import { SocialAuthSection } from './SocialAuthSection';
 
 export interface AuthFormProps {
   mode: AuthMode;
-  onSubmit?: (data: any) => Promise<void>;
+  onSubmit?: (data: LoginRequest | SignupRequest) => Promise<void>;
 }
 
 /**
@@ -41,18 +44,38 @@ export const AuthForm: React.FC<AuthFormProps> = ({
   mode,
   onSubmit: externalOnSubmit,
 }) => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [shouldNavigateAfterLogin, setShouldNavigateAfterLogin] =
+    useState(false);
+
+  // Get authentication state from Redux
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
   // Determine schema and default values based on mode
   const isSignupMode = mode === 'signup';
 
-  // Import login mutation for login mode
-  const loginMutation = useLoginMutation();
+  // Import login mutation for login mode with proper RTK Query syntax
+  const [loginMutation, { isLoading: isLoginLoading }] = useLoginMutation();
 
-  // Get loading state from mutations
-  const isLoginLoading = loginMutation.isPending;
+  // Handle navigation after successful login with skeleton loading
+  useEffect(() => {
+    if (shouldNavigateAfterLogin && isAuthenticated && user) {
+      // Reset the navigation flag
+      setShouldNavigateAfterLogin(false);
+
+      // Navigate to home page with smooth transition and ViewTransition API
+      if ('startViewTransition' in document) {
+        (document as any).startViewTransition(() => {
+          router.replace('/');
+        });
+      } else {
+        router.replace('/');
+      }
+    }
+  }, [shouldNavigateAfterLogin, isAuthenticated, user, router]);
 
   const form = useForm({
     resolver: zodResolver(isSignupMode ? signupSchema : loginSchema),
@@ -62,7 +85,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({
     mode: 'onChange', // Enable real-time validation
   });
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: LoginFormData | SignupFormData) => {
     setIsLoading(true);
 
     try {
@@ -75,46 +98,55 @@ export const AuthForm: React.FC<AuthFormProps> = ({
 
         if (mode === 'login') {
           const loginData = data as LoginFormData;
-          const result = await loginMutation.mutateAsync({
-            email: loginData.email,
-            password: loginData.password,
-            rememberMe: loginData.rememberMe,
-          });
 
-          // Debug: Log the complete response
-          console.log('Complete login response:', result);
+          try {
+            // Use RTK Query mutation with comprehensive error handling
+            const loginResult = loginMutation({
+              email: loginData.email,
+              password: loginData.password,
+              rememberMe: loginData.rememberMe,
+            });
 
-          // Store tokens in localStorage if they exist
-          if (result.accessToken) {
-            localStorage.setItem('accessToken', result.accessToken);
-            console.log('Access token stored in localStorage');
-          } else {
-            console.warn('No accessToken in response');
+            // Check if mutation was triggered successfully
+            if (!loginResult || typeof loginResult.unwrap !== 'function') {
+              throw new Error('Login request failed to initialize');
+            }
+
+            await loginResult.unwrap();
+
+            // Show success message
+            toast.success('Login successful!', {
+              description: 'Welcome back! Redirecting to your dashboard...',
+            });
+
+            // Set flag to trigger navigation after Redux state updates
+            setShouldNavigateAfterLogin(true);
+          } catch (loginError) {
+            // Handle specific login errors
+            const errorMessage =
+              (loginError as { data?: { message?: string }; message?: string })
+                ?.data?.message ||
+              (loginError as Error)?.message ||
+              'Login failed. Please check your credentials and try again.';
+
+            toast.error('Login Failed', {
+              description: errorMessage,
+            });
+
+            // Set form error for user feedback
+            form.setError('root', {
+              type: 'manual',
+              message: errorMessage,
+            });
+
+            throw loginError; // Re-throw to be caught by outer try-catch
           }
-
-          if (result.refreshToken) {
-            localStorage.setItem('refreshToken', result.refreshToken);
-            console.log('Refresh token stored in localStorage');
-          } else {
-            console.warn('No refreshToken in response');
-          }
-
-          console.log('Login successful:', result.message);
-          toast.success('Login successful!', {
-            description: 'Welcome back! Redirecting to your dashboard...',
-          });
         } else {
           const signupData = data as SignupFormData;
           // Simulate different responses based on email
           if (signupData.email === 'test@example.com') {
             throw new Error('User already exists with this email');
           }
-
-          console.log('Signup data:', {
-            name: signupData.name,
-            email: signupData.email,
-            // Don't log password in production
-          });
 
           toast.success('Account created successfully!', {
             description: 'Please check your email for verification.',

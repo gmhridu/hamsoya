@@ -71,7 +71,7 @@ export const ForgotPasswordOTPVerification: React.FC<
   const handleSubmit = async (data: ForgotPasswordOTPFormData) => {
     try {
       await onVerify(data.otp);
-    } catch (error) {
+    } catch {
       // Error handling is managed by parent component
     }
   };
@@ -85,7 +85,7 @@ export const ForgotPasswordOTPVerification: React.FC<
       setCountdown(60);
       setCanResend(false);
       form.setValue('otp', ''); // Clear OTP input
-    } catch (error) {
+    } catch {
       // Error handling is managed by parent component
     } finally {
       setIsResending(false);
@@ -104,7 +104,7 @@ export const ForgotPasswordOTPVerification: React.FC<
             Check Your Email
           </h3>
           <p className="text-gray-600 text-sm">
-            We've sent a 6-digit verification code to
+            We&apos;ve sent a 6-digit verification code to
           </p>
           <p className="text-brand-primary font-medium">{email}</p>
         </div>
@@ -206,7 +206,7 @@ export const ForgotPasswordOTPVerification: React.FC<
           {/* Resend Code */}
           <div className="text-center space-y-3">
             <p className="text-gray-600 text-sm">
-              Didn't receive the code?{' '}
+              Didn&apos;t receive the code?{' '}
               {canResend ? (
                 <Button
                   type="button"
@@ -253,7 +253,7 @@ export const ForgotPasswordOTPVerification: React.FC<
             </svg>
           </div>
           <div className="text-blue-700 text-sm">
-            <p className="font-medium mb-1">Can't find the email?</p>
+            <p className="font-medium mb-1">Can&apos;t find the email?</p>
             <ul className="space-y-1 text-blue-600">
               <li>• Check your spam or junk folder</li>
               <li>• Make sure you entered the correct email</li>

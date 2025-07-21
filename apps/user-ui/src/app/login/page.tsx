@@ -1,19 +1,5 @@
 import { Metadata } from 'next';
-import dynamicImport from 'next/dynamic';
-
-const LoginPageWrapper = dynamicImport(
-  () =>
-    import('../../components/auth/LoginPageWrapper').then((mod) => ({
-      default: mod.LoginPageWrapper,
-    })),
-  {
-    loading: () => (
-      <main className="min-h-screen bg-gradient-to-br from-brand-secondary via-brand-secondary/90 to-brand-accent relative overflow-hidden flex items-center justify-center">
-        <div className="text-white text-lg">Loading...</div>
-      </main>
-    ),
-  }
-);
+import { LoginPageWrapper } from '../../components/auth/LoginPageWrapper';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +11,8 @@ export const metadata: Metadata = {
 
 /**
  * Login Page - Server Component
- * Provides SEO-optimized login page with client-side form functionality and route protection
+ * Provides SEO-optimized login page with instant authentication checks and no loading states
+ * Eliminates white screen flashes by removing dynamic imports and loading states
  */
 export default function LoginPage() {
   return <LoginPageWrapper />;
