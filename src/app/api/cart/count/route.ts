@@ -13,13 +13,13 @@ const BACKEND_URL = API_CONFIG.backend.base;
 
 // Create a server-side tRPC client
 const trpcClient = createTRPCProxyClient<any>({
-  transformer: superjson,
   links: [
     httpLink({
       url: API_CONFIG.backend.trpc,
       headers: {
         'Content-Type': 'application/json',
       },
+      transformer: superjson,
     }),
   ],
 });
