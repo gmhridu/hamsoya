@@ -6,21 +6,10 @@
 import type { User } from '@/types/auth';
 import {
   getCurrentUser,
-  getCurrentUserWithRefresh,
-  getServerUser,
-  hasRole,
-  isAdmin,
-  isAuthenticated,
-  isSeller,
   protectRoute,
-  protectRouteSafe,
   requireAdmin,
-  requireAdminSafe,
-  requireAuth,
   requireGuest,
-  requireRole,
   requireSeller,
-  requireSellerSafe,
   type AuthResult,
 } from './auth-server';
 

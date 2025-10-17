@@ -46,6 +46,8 @@ export const trpcClientConfig = {
         return fetch(url, {
           ...options,
           credentials: 'include',
+          // Disable caching for cart and bookmarks to prevent stale data
+          cache: 'no-store',
         });
       },
     }),

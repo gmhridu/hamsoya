@@ -8,7 +8,7 @@
 
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
-import { API_CONFIG } from '@/lib/api-config';
+import { API_CONFIG } from './api-config';
 
 export interface LoginCredentials {
   email: string;
@@ -82,7 +82,6 @@ async function setAuthCookies(response: Response): Promise<void> {
 
 /**
  * Server action for instant login with server-side redirects
- * Eliminates client-side navigation for optimal performance
  */
 export async function serverLoginAction(credentials: LoginCredentials): Promise<never> {
   const { email, password, redirectTo } = credentials;
@@ -94,13 +93,11 @@ export async function serverLoginAction(credentials: LoginCredentials): Promise<
   try {
     console.log('[SERVER-LOGIN] Starting login process for:', email);
 
-    // Call backend API for authentication
     const response = await fetch(API_CONFIG.backend.auth.login, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
+
     });
 
     if (!response.ok) {
@@ -110,43 +107,42 @@ export async function serverLoginAction(credentials: LoginCredentials): Promise<
       redirect(`/login?error=${encodeURIComponent(errorMessage)}`);
     }
 
-    // Set authentication cookies from response
+    // Set authentication cookies
     await setAuthCookies(response);
 
-    // Get user data and determine redirect
+    // Parse response data
     const data = await response.json();
     if (data.success && data.data?.user) {
       const user = data.data.user;
       const finalRedirectUrl = getRoleBasedRedirectUrl(user.role, redirectTo);
-
-      console.log(`[SERVER-LOGIN] Login successful, redirecting ${user.role} to: ${finalRedirectUrl}`);
-
-      // Instant server-side redirect
+      console.log(`[SERVER-LOGIN] Login successful, redirecting ${user.role} -> ${finalRedirectUrl}`);
       redirect(finalRedirectUrl);
     }
 
-    // Fallback redirect
     console.log('[SERVER-LOGIN] No user data, redirecting to home');
     redirect('/');
   } catch (error) {
-    // Check if this is a NEXT_REDIRECT error (expected behavior)
-    if (error && typeof error === 'object' && 'digest' in error &&
-        typeof error.digest === 'string' && error.digest.startsWith('NEXT_REDIRECT')) {
-      // This is the expected redirect behavior, re-throw it
+    // ✅ Handle intentional Next.js redirect errors properly
+    if (
+      error &&
+      typeof error === 'object' &&
+      'digest' in error &&
+      typeof error.digest === 'string' &&
+      error.digest.startsWith('NEXT_REDIRECT')
+    ) {
       throw error;
     }
 
-    console.error('[SERVER-LOGIN] Server login error:', error);
+    console.error('[SERVER-LOGIN] Unexpected error:', error);
     redirect('/login?error=Login failed. Please try again.');
   }
 }
 
 /**
- * Server action for user registration
- * Handles registration and redirects to verification page
+ * Server action for user registration with proper redirect handling
  */
 export async function serverRegisterAction(credentials: RegisterCredentials): Promise<never> {
-  const { name, email, password, phone_number, profile_image_url, redirectTo } = credentials;
+  const { name, email, password, phone_number, profile_image_url } = credentials;
 
   if (!name || !email || !password) {
     redirect('/login?error=Missing required fields');
@@ -155,16 +151,8 @@ export async function serverRegisterAction(credentials: RegisterCredentials): Pr
   try {
     const response = await fetch(API_CONFIG.backend.auth.register, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-        phone_number,
-        profile_image_url,
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password, phone_number, profile_image_url }),
     });
 
     if (!response.ok) {
@@ -176,65 +164,92 @@ export async function serverRegisterAction(credentials: RegisterCredentials): Pr
     const data = await response.json();
 
     if (data.success) {
-      // Redirect to email verification page
       const verifyUrl = `/verify-email?email=${encodeURIComponent(email)}`;
+      console.log(`[SERVER-REGISTER] Success -> redirecting to: ${verifyUrl}`);
       redirect(verifyUrl);
     } else {
       const errorMessage = data.error || data.message || 'Registration failed';
       redirect(`/login?error=${encodeURIComponent(errorMessage)}`);
     }
   } catch (error) {
-    console.error('Server registration error:', error);
+    // ✅ Handle Next.js redirect correctly
+    if (
+      error &&
+      typeof error === 'object' &&
+      'digest' in error &&
+      typeof error.digest === 'string' &&
+      error.digest.startsWith('NEXT_REDIRECT')
+    ) {
+      throw error;
+    }
+
+    console.error('[SERVER-REGISTER] Unexpected error:', error);
     redirect('/login?error=Registration failed. Please try again.');
   }
 }
 
 /**
- * FormData wrapper for login action
- * Converts FormData to typed credentials for compatibility
+ * FormData wrapper for login
  */
 export async function serverLoginFormAction(formData: FormData): Promise<never> {
   try {
     const credentials: LoginCredentials = {
       email: formData.get('email') as string,
       password: formData.get('password') as string,
-      redirectTo: formData.get('redirectTo') as string || undefined,
+      redirectTo: (formData.get('redirectTo') as string) || undefined,
     };
 
     return await serverLoginAction(credentials);
   } catch (error) {
-    // Re-throw NEXT_REDIRECT errors to allow proper redirects
-    if (error && typeof error === 'object' && 'digest' in error &&
-        typeof error.digest === 'string' && error.digest.startsWith('NEXT_REDIRECT')) {
+    // ✅ Re-throw intentional redirect errors
+    if (
+      error &&
+      typeof error === 'object' &&
+      'digest' in error &&
+      typeof error.digest === 'string' &&
+      error.digest.startsWith('NEXT_REDIRECT')
+    ) {
       throw error;
     }
 
-    // Handle other errors
-    console.error('[SERVER-LOGIN-FORM] Form action error:', error);
+    console.error('[SERVER-LOGIN-FORM] Unexpected error:', error);
     redirect('/login?error=Login failed. Please try again.');
   }
 }
 
 /**
- * FormData wrapper for register action
- * Converts FormData to typed credentials for compatibility
+ * FormData wrapper for registration
  */
 export async function serverRegisterFormAction(formData: FormData): Promise<never> {
-  const credentials: RegisterCredentials = {
-    name: formData.get('name') as string,
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-    phone_number: formData.get('phone_number') as string || undefined,
-    profile_image_url: formData.get('profile_image_url') as string || undefined,
-    redirectTo: formData.get('redirectTo') as string || undefined,
-  };
+  try {
+    const credentials: RegisterCredentials = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      password: formData.get('password') as string,
+      phone_number: (formData.get('phone_number') as string) || undefined,
+      profile_image_url: (formData.get('profile_image_url') as string) || undefined,
+      redirectTo: (formData.get('redirectTo') as string) || undefined,
+    };
 
-  return serverRegisterAction(credentials);
+    return await serverRegisterAction(credentials);
+  } catch (error) {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'digest' in error &&
+      typeof error.digest === 'string' &&
+      error.digest.startsWith('NEXT_REDIRECT')
+    ) {
+      throw error;
+    }
+
+    console.error('[SERVER-REGISTER-FORM] Unexpected error:', error);
+    redirect('/login?error=Registration failed. Please try again.');
+  }
 }
 
 /**
  * Instant role-based redirect using JWT token
- * Decodes JWT and redirects user before HTML loads
  */
 export async function instantRoleBasedRedirect(redirectTo?: string): Promise<never> {
   try {
@@ -242,7 +257,6 @@ export async function instantRoleBasedRedirect(redirectTo?: string): Promise<nev
     const accessToken = cookieStore.get('accessToken')?.value;
 
     if (accessToken) {
-      // Fast JWT decode without verification for role extraction
       const { decodeJWTPayload } = await import('@/lib/server-jwt-decoder');
       const payload = decodeJWTPayload(accessToken);
 
@@ -253,10 +267,20 @@ export async function instantRoleBasedRedirect(redirectTo?: string): Promise<nev
       }
     }
 
-    // No valid token, redirect to login
     redirect('/login');
   } catch (error) {
-    console.error('Instant redirect error:', error);
+    // ✅ Allow proper redirect
+    if (
+      error &&
+      typeof error === 'object' &&
+      'digest' in error &&
+      typeof error.digest === 'string' &&
+      error.digest.startsWith('NEXT_REDIRECT')
+    ) {
+      throw error;
+    }
+
+    console.error('[INSTANT-REDIRECT] Unexpected error:', error);
     redirect('/login');
   }
 }

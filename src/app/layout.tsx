@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/layout/theme-provider';
 
 import { EnhancedServerStorageProvider } from '@/components/providers/enhanced-server-storage-provider';
 import { AuthHydrationProvider } from '@/components/providers/auth-hydration-provider';
+import { ServerAuthProvider } from '@/components/providers/server-auth-provider';
 import { StorageSync } from '@/components/providers/storage-sync';
 import { TRPCProvider } from '@/components/providers/trpc-provider';
 import { ChunkErrorBoundary } from '@/components/ui/chunk-error-boundary';
@@ -36,7 +37,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 // Enable native View Transitions for smooth navigation
-export const unstable_viewTransition = true;
+
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
@@ -134,23 +135,28 @@ export default async function RootLayout({
               disableTransitionOnChange
             >
               <AuthHydrationProvider serverAuthState={serverAuthState}>
-                <EnhancedServerStorageProvider
-                  cart={serverStorage.cart}
-                  bookmarks={serverStorage.bookmarks}
+                <ServerAuthProvider
+                  user={serverAuthState.user}
+                  isAuthenticated={serverAuthState.isAuthenticated}
                 >
-                  {/* Automatic token cleanup and refresh */}
-                  <TokenCleanup />
-                  <TokenRefreshInitializer />
-                  {/* Storage state synchronization */}
-                  <StorageSync />
-                  {/* Storage synchronization for data persistence */}
-                  <StorageSyncInitializer />
-                  <PageTransition>
-                    <ConditionalLayout>
-                      {children}
-                    </ConditionalLayout>
-                  </PageTransition>
-                </EnhancedServerStorageProvider>
+                  <EnhancedServerStorageProvider
+                    cart={serverStorage.cart}
+                    bookmarks={serverStorage.bookmarks}
+                  >
+                    {/* Automatic token cleanup and refresh */}
+                    <TokenCleanup />
+                    <TokenRefreshInitializer />
+                    {/* Storage state synchronization */}
+                    <StorageSync />
+                    {/* Storage synchronization for data persistence */}
+                    <StorageSyncInitializer />
+                    <PageTransition>
+                      <ConditionalLayout>
+                        {children}
+                      </ConditionalLayout>
+                    </PageTransition>
+                  </EnhancedServerStorageProvider>
+                </ServerAuthProvider>
               </AuthHydrationProvider>
               <Toaster />
             </ThemeProvider>

@@ -96,10 +96,13 @@ export async function attemptServerSideRefresh(
     const refreshToken = request.cookies.get('refreshToken')?.value;
 
     if (!refreshToken) {
+      console.log('[TOKEN-REFRESH] No refresh token found');
       return { success: false };
     }
 
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+    console.log('[TOKEN-REFRESH] Attempting server-side refresh with backend URL:', backendUrl);
 
     const response = await fetch(`${backendUrl}/api/auth/refresh-token`, {
       method: 'POST',
@@ -107,22 +110,39 @@ export async function attemptServerSideRefresh(
         'Content-Type': 'application/json',
         Cookie: `refreshToken=${refreshToken}`,
       },
+      // Ensure no caching for refresh requests
+      cache: 'no-store',
     });
 
+    console.log('[TOKEN-REFRESH] Refresh response status:', response.status);
+
     if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error');
+      console.log('[TOKEN-REFRESH] Refresh failed:', response.status, errorText);
       return { success: false };
     }
 
     const data = await response.json();
 
-    // Extract new tokens from response
-    const newAccessToken = data.data?.accessToken || data.accessToken;
-    const newRefreshToken = data.data?.refreshToken || data.refreshToken;
+    console.log('[TOKEN-REFRESH] Refresh response data keys:', Object.keys(data));
+
+    // Extract new tokens from response - try multiple possible formats
+    let newAccessToken = data.data?.accessToken || data.accessToken;
+    let newRefreshToken = data.data?.refreshToken || data.refreshToken;
     const user = data.data?.user || data.user;
 
+    // If not found in data structure, check if tokens are in root
+    if (!newAccessToken && data.tokens) {
+      newAccessToken = data.tokens.accessToken;
+      newRefreshToken = data.tokens.refreshToken;
+    }
+
     if (!newAccessToken || !newRefreshToken) {
+      console.log('[TOKEN-REFRESH] Missing tokens in response:', { hasAccessToken: !!newAccessToken, hasRefreshToken: !!newRefreshToken });
       return { success: false };
     }
+
+    console.log('[TOKEN-REFRESH] Tokens successfully refreshed');
 
     return {
       success: true,
@@ -133,7 +153,7 @@ export async function attemptServerSideRefresh(
       user,
     };
   } catch (error) {
-    console.error('Server-side refresh failed:', error);
+    console.error('[TOKEN-REFRESH] Server-side refresh failed:', error);
     return { success: false };
   }
 }
