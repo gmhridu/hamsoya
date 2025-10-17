@@ -9,6 +9,7 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { API_CONFIG } from './api-config';
+import { getUserFriendlyMessage } from './error-messages';
 
 export interface LoginCredentials {
   email: string;
@@ -87,7 +88,8 @@ export async function serverLoginAction(credentials: LoginCredentials): Promise<
   const { email, password, redirectTo } = credentials;
 
   if (!email || !password) {
-    redirect('/login?error=Missing email or password');
+    const errorMessage = getUserFriendlyMessage('Please enter both email and password');
+    redirect(`/login?error=${encodeURIComponent(errorMessage)}`);
   }
 
   try {
@@ -102,7 +104,8 @@ export async function serverLoginAction(credentials: LoginCredentials): Promise<
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.error || errorData.message || 'Login failed';
+      const rawErrorMessage = errorData.error || errorData.message || 'Login failed';
+      const errorMessage = getUserFriendlyMessage(rawErrorMessage);
       console.log('[SERVER-LOGIN] Login failed:', errorMessage);
       redirect(`/login?error=${encodeURIComponent(errorMessage)}`);
     }
@@ -134,7 +137,8 @@ export async function serverLoginAction(credentials: LoginCredentials): Promise<
     }
 
     console.error('[SERVER-LOGIN] Unexpected error:', error);
-    redirect('/login?error=Login failed. Please try again.');
+    const errorMessage = getUserFriendlyMessage(error);
+    redirect(`/login?error=${encodeURIComponent(errorMessage)}`);
   }
 }
 
@@ -145,7 +149,8 @@ export async function serverRegisterAction(credentials: RegisterCredentials): Pr
   const { name, email, password, phone_number, profile_image_url } = credentials;
 
   if (!name || !email || !password) {
-    redirect('/login?error=Missing required fields');
+    const errorMessage = getUserFriendlyMessage('Please fill in all required fields: name, email, and password');
+    redirect(`/login?error=${encodeURIComponent(errorMessage)}`);
   }
 
   try {
@@ -157,7 +162,8 @@ export async function serverRegisterAction(credentials: RegisterCredentials): Pr
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.error || errorData.message || 'Registration failed';
+      const rawErrorMessage = errorData.error || errorData.message || 'Registration failed';
+      const errorMessage = getUserFriendlyMessage(rawErrorMessage);
       redirect(`/login?error=${encodeURIComponent(errorMessage)}`);
     }
 
@@ -168,7 +174,8 @@ export async function serverRegisterAction(credentials: RegisterCredentials): Pr
       console.log(`[SERVER-REGISTER] Success -> redirecting to: ${verifyUrl}`);
       redirect(verifyUrl);
     } else {
-      const errorMessage = data.error || data.message || 'Registration failed';
+      const rawErrorMessage = data.error || data.message || 'Registration failed';
+      const errorMessage = getUserFriendlyMessage(rawErrorMessage);
       redirect(`/login?error=${encodeURIComponent(errorMessage)}`);
     }
   } catch (error) {
@@ -184,7 +191,8 @@ export async function serverRegisterAction(credentials: RegisterCredentials): Pr
     }
 
     console.error('[SERVER-REGISTER] Unexpected error:', error);
-    redirect('/login?error=Registration failed. Please try again.');
+    const errorMessage = getUserFriendlyMessage(error);
+    redirect(`/login?error=${encodeURIComponent(errorMessage)}`);
   }
 }
 
@@ -213,7 +221,8 @@ export async function serverLoginFormAction(formData: FormData): Promise<never> 
     }
 
     console.error('[SERVER-LOGIN-FORM] Unexpected error:', error);
-    redirect('/login?error=Login failed. Please try again.');
+    const errorMessage = getUserFriendlyMessage(error);
+    redirect(`/login?error=${encodeURIComponent(errorMessage)}`);
   }
 }
 
@@ -244,7 +253,8 @@ export async function serverRegisterFormAction(formData: FormData): Promise<neve
     }
 
     console.error('[SERVER-REGISTER-FORM] Unexpected error:', error);
-    redirect('/login?error=Registration failed. Please try again.');
+    const errorMessage = getUserFriendlyMessage(error);
+    redirect(`/login?error=${encodeURIComponent(errorMessage)}`);
   }
 }
 
@@ -281,6 +291,7 @@ export async function instantRoleBasedRedirect(redirectTo?: string): Promise<nev
     }
 
     console.error('[INSTANT-REDIRECT] Unexpected error:', error);
+    // For instant redirect, we don't show error messages to user
     redirect('/login');
   }
 }

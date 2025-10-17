@@ -11,10 +11,11 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { serverLoginAction, serverRegisterAction } from '@/lib/server-auth-actions';
 import { BRAND_NAME } from '@/lib/constants';
+import { getUserFriendlyMessage } from '@/lib/error-messages';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff, Loader, Lock, Mail, Phone, User } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useTransition, useEffect } from 'react';
+import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -104,18 +105,15 @@ export function ServerActionLoginForm({ redirectTo, error }: ServerActionLoginFo
         });
 
         // If we reach here, the server action didn't redirect (unexpected)
-        console.warn('[LOGIN] Server action completed without redirect, showing success toast');
         toast.success('Login successful!', { id: loadingToastId });
       } catch (error: any) {
         // NEXT_REDIRECT is expected behavior for server actions - don't treat as error
         if (error?.message === 'NEXT_REDIRECT' || error?.digest?.startsWith('NEXT_REDIRECT')) {
-          console.log('[LOGIN] Server-side redirect successful');
           toast.success('Login successful! Redirecting...', { id: loadingToastId });
           return; // Redirect is happening
         }
-
-        console.error('Login submission error:', error);
-        toast.error('Login failed. Please try again.', { id: loadingToastId });
+        const errorMessage = getUserFriendlyMessage(error);
+        toast.error(errorMessage, { id: loadingToastId });
       }
     });
   };
@@ -154,9 +152,8 @@ export function ServerActionLoginForm({ redirectTo, error }: ServerActionLoginFo
           });
           return; // Redirect is happening
         }
-
-        console.error('Registration submission error:', error);
-        toast.error('Registration failed. Please try again.', { id: loadingToastId });
+        const errorMessage = getUserFriendlyMessage(error);
+        toast.error(errorMessage, { id: loadingToastId });
       }
     });
   };
@@ -195,7 +192,7 @@ export function ServerActionLoginForm({ redirectTo, error }: ServerActionLoginFo
               {/* Error message */}
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm mb-6">
-                  {error}
+                  {getUserFriendlyMessage(error)}
                 </div>
               )}
 
