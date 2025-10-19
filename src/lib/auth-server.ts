@@ -59,7 +59,7 @@ async function attemptTokenRefresh(): Promise<{ success: boolean; payload?: any 
       cookieStore.set('accessToken', newAccessToken, {
         httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'lax', // Use 'lax' for OAuth compatibility
         maxAge: 5 * 60, // 5 minutes
         path: '/',
       });
@@ -69,7 +69,7 @@ async function attemptTokenRefresh(): Promise<{ success: boolean; payload?: any 
         cookieStore.set('refreshToken', newRefreshToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
+          sameSite: 'lax', // Use 'lax' for OAuth compatibility
           maxAge: 30 * 24 * 60 * 60, // 30 days
           path: '/',
         });
@@ -308,7 +308,7 @@ export async function getCurrentUserWithRefresh(): Promise<AuthResult> {
       cookieStore.set('accessToken', newAccessToken, {
         httpOnly: false,
         secure: isProduction,
-        sameSite: 'strict',
+        sameSite: 'lax', // Use 'lax' for OAuth compatibility
         maxAge: 5 * 60, // 5 minutes
         path: '/',
       });
@@ -317,7 +317,7 @@ export async function getCurrentUserWithRefresh(): Promise<AuthResult> {
       cookieStore.set('refreshToken', newRefreshToken, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: 'strict',
+        sameSite: 'lax', // Use 'lax' for OAuth compatibility
         maxAge: 30 * 24 * 60 * 60, // 30 days
         path: '/',
       });
