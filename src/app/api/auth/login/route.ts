@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
           nextResponse.cookies.set('accessToken', tokenMatch[1], {
             httpOnly: false, // Allow JavaScript access for API calls
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            sameSite: 'strict',
             maxAge: 5 * 60, // 5 minutes (match backend)
             path: '/',
           });
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
           nextResponse.cookies.set('refreshToken', tokenMatch[1], {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            sameSite: 'strict',
             maxAge: 30 * 24 * 60 * 60, // 30 days = 2,592,000 seconds
             path: '/',
           });
