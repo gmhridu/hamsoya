@@ -5,6 +5,7 @@
  */
 
 import { Suspense } from 'react';
+import React from 'react';
 import { StreamingHomePage } from '@/components/home/async-home-sections';
 import { HomePageSkeleton } from '@/components/ui/home-skeletons';
 import {
@@ -12,6 +13,7 @@ import {
   WebsiteStructuredData,
 } from '@/components/seo/structured-data';
 import { SEO_DEFAULTS } from '@/lib/constants';
+import { handleOAuthTokenData } from '@/lib/auth-server';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -52,6 +54,9 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
+      {/* OAuth Token Handler - Must be first */}
+      <OAuthTokenHandler />
+
       {/* Structured Data - Always rendered immediately */}
       <OrganizationStructuredData page="home" />
       <WebsiteStructuredData />
@@ -62,4 +67,17 @@ export default function HomePage() {
       </Suspense>
     </>
   );
+}
+
+/**
+ * Client component to handle OAuth token data from URL parameters
+ */
+function OAuthTokenHandler() {
+  'use client';
+
+  React.useEffect(() => {
+    handleOAuthTokenData();
+  }, []);
+
+  return null; // This component doesn't render anything
 }

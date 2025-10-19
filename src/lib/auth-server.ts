@@ -140,6 +140,56 @@ function verifyRefreshToken(token: string): any {
 }
 
 /**
+ * Handle OAuth token data from URL parameters (for cross-domain OAuth)
+ * This should be called on pages that might receive OAuth redirects
+ */
+export async function handleOAuthTokenData(): Promise<void> {
+  if (typeof window === 'undefined') return; // Server-side only
+
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tokenDataParam = urlParams.get('token_data');
+
+    if (tokenDataParam) {
+      console.log('[OAUTH-CLIENT] Processing token data from URL');
+
+      // Decode the token data
+      const tokenData = JSON.parse(Buffer.from(tokenDataParam, 'base64url').toString());
+
+      // Validate timestamp (10 minutes max)
+      const tokenAge = Date.now() - (tokenData.timestamp || 0);
+      if (tokenAge > 10 * 60 * 1000) {
+        console.error('[OAUTH-CLIENT] Token data expired');
+        return;
+      }
+
+      // Set cookies on the client side
+      document.cookie = `accessToken=${tokenData.accessToken}; path=/; max-age=${15 * 60}; SameSite=Lax`;
+      document.cookie = `refreshToken=${tokenData.refreshToken}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
+      document.cookie = `userInfo=${JSON.stringify(tokenData.user)}; path=/; max-age=${15 * 60}; SameSite=Lax`;
+
+      console.log('[OAUTH-CLIENT] Tokens set successfully:', {
+        hasAccessToken: !!tokenData.accessToken,
+        hasRefreshToken: !!tokenData.refreshToken,
+        userId: tokenData.user?.id,
+      });
+
+      // Clean up URL
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('token_data');
+      newUrl.searchParams.delete('auth');
+      newUrl.searchParams.delete('new_user');
+
+      // Use history.replaceState to clean URL without triggering navigation
+      window.history.replaceState({}, document.title, newUrl.pathname + newUrl.search);
+
+    }
+  } catch (error) {
+    console.error('[OAUTH-CLIENT] Failed to process token data:', error);
+  }
+}
+
+/**
  * Get current user from server-side cookies
  * This runs on the server and provides instant auth state with automatic token refresh
  */
