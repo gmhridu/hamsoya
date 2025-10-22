@@ -197,13 +197,13 @@ export function ServerActionLoginForm({ redirectTo, error }: ServerActionLoginFo
               )}
 
               {/* Google OAuth Button */}
-              <div className="space-y-4 mb-6">
+              {/* <div className="space-y-4 mb-6">
                 <GoogleOAuthButton
                   redirectTo={redirectTo}
                   disabled={isPending}
                 />
                 <OAuthSeparator />
-              </div>
+              </div> */}
 
               <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-6">
                 <div className="space-y-2">
@@ -295,13 +295,13 @@ export function ServerActionLoginForm({ redirectTo, error }: ServerActionLoginFo
               <OAuthSuccessHandler newUser={newUser} />
 
               {/* Google OAuth Button */}
-              <div className="space-y-4 mb-6">
+              {/* <div className="space-y-4 mb-6">
                 <GoogleOAuthButton
                   redirectTo={redirectTo}
                   disabled={isPending}
                 />
                 <OAuthSeparator />
-              </div>
+              </div> */}
 
               <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-6">
                 <div className="space-y-2">

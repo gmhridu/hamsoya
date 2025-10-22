@@ -125,8 +125,6 @@ async function verifyAccessToken(token: string): Promise<any> {
   } catch (error) {
     console.error('[SERVER-AUTH] Token verification failed:', {
       error: error instanceof Error ? error.message : error,
-      tokenLength: token?.length,
-      secretLength: process.env.JWT_ACCESS_SECRET?.length,
     });
     return null;
   }
