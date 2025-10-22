@@ -13,7 +13,7 @@ import {
   WebsiteStructuredData,
 } from '@/components/seo/structured-data';
 import { SEO_DEFAULTS } from '@/lib/constants';
-import { handleOAuthTokenData } from '@/lib/auth-server';
+import { OAuthTokenHandler } from '@/components/OAuthTokenHandler';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -69,16 +69,3 @@ export default function HomePage() {
   );
 }
 
-/**
- * Client component to handle OAuth token data from URL parameters
- */
-function OAuthTokenHandler() {
-  'use client';
-
-  React.useEffect(() => {
-    console.log('[OAUTH-HANDLER] Component mounted, calling handleOAuthTokenData');
-    handleOAuthTokenData();
-  }, []);
-
-  return null; // This component doesn't render anything
-}
