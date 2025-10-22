@@ -92,17 +92,42 @@ async function attemptTokenRefresh(): Promise<{ success: boolean; payload?: any 
  */
 async function verifyAccessToken(token: string): Promise<any> {
   try {
-    if (!process.env.JWT_ACCESS_SECRET) {
+    // Check if JWT secrets are available
+    const accessSecret = process.env.JWT_ACCESS_SECRET;
+    const refreshSecret = process.env.JWT_REFRESH_SECRET;
+
+    console.log('[SERVER-AUTH] Environment check:', {
+      hasAccessSecret: !!accessSecret,
+      hasRefreshSecret: !!refreshSecret,
+      accessSecretLength: accessSecret?.length,
+      refreshSecretLength: refreshSecret?.length,
+      nodeEnv: process.env.NODE_ENV,
+    });
+
+    if (!accessSecret) {
+      console.error('[SERVER-AUTH] JWT_ACCESS_SECRET environment variable not found');
+      console.error('[SERVER-AUTH] Available env vars:', Object.keys(process.env).filter(key => key.includes('JWT')));
       return null;
     }
 
     // Use jsonwebtoken.verify (same as backend)
-    const payload = jwt.verify(token, process.env.JWT_ACCESS_SECRET, {
+    const payload = jwt.verify(token, accessSecret, {
       algorithms: ['HS256'],
+    });
+
+    console.log('[SERVER-AUTH] Token verified successfully:', {
+      userId: (payload as any).userId,
+      email: (payload as any).email,
+      role: (payload as any).role,
     });
 
     return payload;
   } catch (error) {
+    console.error('[SERVER-AUTH] Token verification failed:', {
+      error: error instanceof Error ? error.message : error,
+      tokenLength: token?.length,
+      secretLength: process.env.JWT_ACCESS_SECRET?.length,
+    });
     return null;
   }
 }
@@ -113,13 +138,15 @@ async function verifyAccessToken(token: string): Promise<any> {
  */
 function verifyRefreshToken(token: string): any {
   try {
-    if (!process.env.JWT_REFRESH_SECRET) {
+    const refreshSecret = process.env.JWT_REFRESH_SECRET;
+
+    if (!refreshSecret) {
       console.error('JWT_REFRESH_SECRET environment variable is required');
       return null;
     }
 
     // Use jsonwebtoken.verify (same as backend)
-    const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET, {
+    const payload = jwt.verify(token, refreshSecret, {
       algorithms: ['HS256'],
     });
 
@@ -144,35 +171,138 @@ function verifyRefreshToken(token: string): any {
  * This should be called on pages that might receive OAuth redirects
  */
 export async function handleOAuthTokenData(): Promise<void> {
-  if (typeof window === 'undefined') return; // Server-side only
+  if (typeof window === 'undefined') {
+    console.log('[OAUTH-CLIENT] Server-side execution - skipping token processing');
+    return; // Server-side only
+  }
 
   try {
+    console.log('[OAUTH-CLIENT] Starting OAuth token processing...');
+    console.log('[OAUTH-CLIENT] Current URL:', window.location.href);
+    console.log('[OAUTH-CLIENT] URL search params:', window.location.search);
+
     const urlParams = new URLSearchParams(window.location.search);
     const tokenDataParam = urlParams.get('token_data');
+
+    console.log('[OAUTH-CLIENT] Token data param exists:', !!tokenDataParam);
+    console.log('[OAUTH-CLIENT] Token data param length:', tokenDataParam?.length);
 
     if (tokenDataParam) {
       console.log('[OAUTH-CLIENT] Processing token data from URL');
 
-      // Decode the token data
-      const tokenData = JSON.parse(Buffer.from(tokenDataParam, 'base64url').toString());
+      // Decode the token data (browser-compatible base64url decoding)
+      let decodedData: string;
+      try {
+        console.log('[OAUTH-CLIENT] Attempting to decode token data...');
+        console.log('[OAUTH-CLIENT] Token data param length:', tokenDataParam.length);
+
+        // For base64url without padding, we need to add padding back
+        const paddedParam = tokenDataParam + '='.repeat((4 - tokenDataParam.length % 4) % 4);
+        console.log('[OAUTH-CLIENT] Padded param length:', paddedParam.length);
+
+        // Convert base64url to base64
+        const base64Data = paddedParam.replace(/-/g, '+').replace(/_/g, '/');
+        console.log('[OAUTH-CLIENT] Base64 data length:', base64Data.length);
+
+        // Decode base64
+        const binaryString = atob(base64Data);
+        console.log('[OAUTH-CLIENT] Binary string length:', binaryString.length);
+
+        // Convert binary string to UTF-8
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        decodedData = new TextDecoder('utf-8').decode(bytes);
+        console.log('[OAUTH-CLIENT] Decoded data length:', decodedData.length);
+        console.log('[OAUTH-CLIENT] Decoded data preview:', decodedData.substring(0, 100) + '...');
+      } catch (decodeError) {
+        console.error('[OAUTH-CLIENT] Primary decoding failed:', decodeError);
+        console.error('[OAUTH-CLIENT] Token data param:', tokenDataParam);
+        console.error('[OAUTH-CLIENT] Token data param length:', tokenDataParam.length);
+
+        // Try alternative decoding method with manual padding calculation
+        try {
+          console.log('[OAUTH-CLIENT] Trying alternative decoding method...');
+          // Calculate proper padding
+          const remainder = tokenDataParam.length % 4;
+          const paddingNeeded = remainder === 0 ? 0 : (4 - remainder);
+          const paddedParam = tokenDataParam + '='.repeat(paddingNeeded);
+
+          const base64Data = paddedParam.replace(/-/g, '+').replace(/_/g, '/');
+          const binaryString = atob(base64Data);
+
+          // Convert binary string to UTF-8
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          decodedData = new TextDecoder('utf-8').decode(bytes);
+          console.log('[OAUTH-CLIENT] Alternative decoding successful');
+        } catch (altDecodeError) {
+          console.error('[OAUTH-CLIENT] Alternative decoding also failed:', altDecodeError);
+          throw new Error(`Failed to decode OAuth token data: ${decodeError instanceof Error ? decodeError.message : decodeError}`);
+        }
+      }
+
+      const tokenData = JSON.parse(decodedData);
+      console.log('[OAUTH-CLIENT] Parsed token data:', {
+        hasAccessToken: !!tokenData.accessToken,
+        hasRefreshToken: !!tokenData.refreshToken,
+        hasUser: !!tokenData.user,
+        userId: tokenData.user?.id,
+        timestamp: tokenData.timestamp,
+      });
 
       // Validate timestamp (10 minutes max)
       const tokenAge = Date.now() - (tokenData.timestamp || 0);
+      console.log('[OAUTH-CLIENT] Token age (ms):', tokenAge);
+
       if (tokenAge > 10 * 60 * 1000) {
         console.error('[OAUTH-CLIENT] Token data expired');
         return;
       }
 
-      // Set cookies on the client side
-      document.cookie = `accessToken=${tokenData.accessToken}; path=/; max-age=${15 * 60}; SameSite=Lax`;
-      document.cookie = `refreshToken=${tokenData.refreshToken}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
-      document.cookie = `userInfo=${JSON.stringify(tokenData.user)}; path=/; max-age=${15 * 60}; SameSite=Lax`;
+      // Set cookies on the client side with secure settings for Vercel
+      const isProduction = window.location.hostname.includes('vercel.app');
+      const cookieOptions = `path=/; SameSite=Lax${isProduction ? '; Secure' : ''}`;
+
+      console.log('[OAUTH-CLIENT] Setting access token cookie');
+      document.cookie = `accessToken=${tokenData.accessToken}; ${cookieOptions}; max-age=${15 * 60}`;
+
+      console.log('[OAUTH-CLIENT] Setting refresh token cookie');
+      document.cookie = `refreshToken=${tokenData.refreshToken}; ${cookieOptions}; max-age=${30 * 24 * 60 * 60}`;
+
+      console.log('[OAUTH-CLIENT] Setting user info cookie');
+      document.cookie = `userInfo=${JSON.stringify(tokenData.user)}; ${cookieOptions}; max-age=${15 * 60}`;
+
+      // Force cookie verification
+      console.log('[OAUTH-CLIENT] Verifying cookies after setting:');
+      const checkCookies = () => {
+        const cookies = document.cookie.split(';').map(c => c.trim());
+        console.log('[OAUTH-CLIENT] All cookies:', cookies);
+        console.log('[OAUTH-CLIENT] Has accessToken:', cookies.some(c => c.startsWith('accessToken=')));
+        console.log('[OAUTH-CLIENT] Has refreshToken:', cookies.some(c => c.startsWith('refreshToken=')));
+        console.log('[OAUTH-CLIENT] Has userInfo:', cookies.some(c => c.startsWith('userInfo=')));
+      };
+
+      // Check immediately and after a short delay
+      checkCookies();
+      setTimeout(checkCookies, 100);
 
       console.log('[OAUTH-CLIENT] Tokens set successfully:', {
         hasAccessToken: !!tokenData.accessToken,
         hasRefreshToken: !!tokenData.refreshToken,
         userId: tokenData.user?.id,
+        accessTokenLength: tokenData.accessToken?.length,
+        refreshTokenLength: tokenData.refreshToken?.length,
       });
+
+      // Verify cookies were set
+      console.log('[OAUTH-CLIENT] Verifying cookies after setting:');
+      console.log('[OAUTH-CLIENT] Document cookie length:', document.cookie.length);
+      console.log('[OAUTH-CLIENT] Access token in document.cookie:', document.cookie.includes('accessToken'));
+      console.log('[OAUTH-CLIENT] Refresh token in document.cookie:', document.cookie.includes('refreshToken'));
 
       // Clean up URL
       const newUrl = new URL(window.location.href);
@@ -180,12 +310,30 @@ export async function handleOAuthTokenData(): Promise<void> {
       newUrl.searchParams.delete('auth');
       newUrl.searchParams.delete('new_user');
 
+      console.log('[OAUTH-CLIENT] Cleaning URL from:', window.location.href, 'to:', newUrl.pathname + newUrl.search);
+
       // Use history.replaceState to clean URL without triggering navigation
       window.history.replaceState({}, document.title, newUrl.pathname + newUrl.search);
 
+      console.log('[OAUTH-CLIENT] URL cleaned, triggering page reload to refresh server state');
+      // Force a hard refresh to ensure server-side auth state is updated
+      window.location.reload();
+
+      // Also trigger a client-side navigation to ensure React components re-render
+      console.log('[OAUTH-CLIENT] Triggering client-side navigation');
+      if ((window as any).next && (window as any).next.router) {
+        (window as any).next.router.reload();
+      }
+
+    } else {
+      console.log('[OAUTH-CLIENT] No token data found in URL parameters');
     }
   } catch (error) {
     console.error('[OAUTH-CLIENT] Failed to process token data:', error);
+    console.error('[OAUTH-CLIENT] Error details:', {
+      message: error instanceof Error ? error.message : error,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
   }
 }
 
@@ -197,6 +345,12 @@ export async function getCurrentUser(): Promise<AuthResult> {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken')?.value;
+
+    console.log('[SERVER-AUTH] Checking authentication state:', {
+      hasAccessToken: !!accessToken,
+      accessTokenLength: accessToken?.length,
+      allCookies: cookieStore.getAll().map(c => ({ name: c.name, hasValue: !!c.value })),
+    });
 
     // Create cache key based on token
     const cacheKey = accessToken || 'no-token';

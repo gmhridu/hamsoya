@@ -76,6 +76,7 @@ function OAuthTokenHandler() {
   'use client';
 
   React.useEffect(() => {
+    console.log('[OAUTH-HANDLER] Component mounted, calling handleOAuthTokenData');
     handleOAuthTokenData();
   }, []);
 
